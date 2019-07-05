@@ -83,7 +83,16 @@ for i in range(len(computers)):
 # Navigate to webpage
 # driver.get("https://ghsprod.service-now.com/nav_to.do?uri=%2Fsc_task.do%3Fsys_id%3D07feba5bdb1677c0d4aa710439961995%26sysparm_view%3Dtext_search%26sysparm_record_target%3Dsc_task%26sysparm_record_row%3D3%26sysparm_record_rows%3D4%26sysparm_record_list%3D123TEXTQUERY321%25253DDT2UA50516QQ")
 
-driver.get("https://ghsprod.service-now.com/nav_to.do?uri=%2Ftextsearch.do%3Fsysparm_search%3DDT2UA3351XQ6")
+# Open to service catalog
+driver.get("https://ghsprod.service-now.com/nav_to.do?uri=%2Fcatalog_home.do%3Fsysparm_view%3Dcatalog_default")
+
+# Make sure we have the default/top iframe selected
+driver.switch_to.default_content()
+
+# Search for the 1st computer
+searchbox = driver.find_element_by_xpath("//*[@id='sysparm_search']")
+searchbox.click()
+searchbox.send_keys(computers[0])
 
 # Switch to main content iframe
 driver.switch_to.frame(driver.find_element_by_class_name("navpage-main-left").find_element_by_xpath(".//iframe"))
@@ -97,11 +106,6 @@ try:
 except:
     print("No task selected. Quitting due to timeout")
     driver.quit()
-
-driver.switch_to.default_content()
-
-# Click search box
-driver.find_element_by_xpath("//*[@id='sysparm_search']").click()
 
 # Switch to main content iframe
 driver.switch_to.frame(driver.find_element_by_class_name("navpage-main-left").find_element_by_xpath(".//iframe"))
