@@ -2,6 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 import time
 import csv
 
@@ -40,8 +41,22 @@ def submitTicket(bool):
 
 
 def importCSV(inputCSV):
-    outputArray = open(inputCSV, 'r').read(-1).split(',')
-    return outputArray
+     with open(inputCSV) as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        line_count = 0
+        outputArray = []
+        for row in csv_reader:
+            serial = row[0]
+            #if row[1]:
+            #    host = row[1]
+            #if row[2]:
+            #    ritm = row[2]
+            outputArray.append(serial)
+            print(row)
+            line_count += 1
+        print(f'Processed {line_count} lines.')
+        return outputArray
+
 
 
 def writeToCSV(rowArray, csvFile):
@@ -93,6 +108,7 @@ driver.switch_to.default_content()
 searchbox = driver.find_element_by_xpath("//*[@id='sysparm_search']")
 searchbox.click()
 searchbox.send_keys(computers[0])
+searchbox.send_keys(Keys.RETURN)
 
 # Switch to main content iframe
 driver.switch_to.frame(driver.find_element_by_class_name("navpage-main-left").find_element_by_xpath(".//iframe"))
