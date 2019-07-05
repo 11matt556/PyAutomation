@@ -51,7 +51,8 @@ def selTicketStateFromDropdown(status):
     driver.find_element_by_id('sc_task.state').find_element_by_xpath("//option[. = '" + status + "']").click()
 
 def inputComment(commentString):
-    commentArea = driver.find_element_by_id('activity-stream-comments-textarea')
+    #commentArea = driver.find_element_by_id('activity-stream-comments-textarea')
+    commentArea = driver.find_element_by_xpath("//textarea[@id='activity-stream-comments-textarea']")
     actions.move_to_element(commentArea)
     actions.click(commentArea)
     actions.send_keys(commentString)
