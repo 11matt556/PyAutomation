@@ -127,9 +127,6 @@ except:
     print("No task selected. Quitting due to timeout")
     driver.quit()
 
-# Switch to main content iframe
-driver.switch_to.frame(driver.find_element_by_class_name("navpage-main-left").find_element_by_xpath(".//iframe"))
-
 print("Wait")
 time.sleep(5)
 
@@ -146,7 +143,7 @@ print("Wait")
 time.sleep(5)
 
 # Save ticket
-submitTicket('false')
+submitTicket('true')
 
 print("Wait")
 time.sleep(5)
@@ -182,7 +179,7 @@ print("Wait")
 time.sleep(5)
 
 # Save ticket
-submitTicket('false')
+submitTicket('true')
 
 print("Wait")
 time.sleep(5)
