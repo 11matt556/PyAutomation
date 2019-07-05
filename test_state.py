@@ -25,4 +25,3 @@ class TestUntitled():
     dropdown = self.driver.find_element(By.ID, "sc_task.state")
     dropdown.find_element(By.XPATH, "//option[. = 'Work in Progress']").click()
     self.driver.find_element(By.ID, "sc_task.state").click()
-  
