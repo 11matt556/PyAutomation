@@ -1,1 +1,4 @@
-Requires Python 3.x
+Requires 
+
+Python 3.x
+chromedriver.exe
