@@ -15,7 +15,7 @@ driver.implicitly_wait(3)
 
 # End global variables
 # Start Functions
-def submitTicket(bool):
+def submitTicket(really):
     actions = webdriver.ActionChains(driver)
     # print("Switch to iframe")
     # driver.switch_to.frame(driver.find_element_by_class_name("navpage-main-left").find_element_by_xpath(".//iframe"))
@@ -30,7 +30,7 @@ def submitTicket(bool):
     saveButton = driver.find_element_by_xpath("//div[@id='context_1']/div[2]")
     # print(' Save button is here: ' + str(saveButton))
 
-    if bool == 'true':
+    if really == 'true':
         saveButton.click()
         #actions.move_to_element(saveButton)
         #actions.click(saveButton)
@@ -82,6 +82,13 @@ def inputComment(commentString):
     commentArea.send_keys(commentString)
     print("Typing " + str(commentString))
 
+
+def search(inputString):
+    searchbox = driver.find_element_by_xpath("//*[@id='sysparm_search']")
+    searchbox.click()
+    searchbox.send_keys(computers[0])
+    searchbox.send_keys(Keys.RETURN)
+
 #
 #
 # End Functions
@@ -105,10 +112,7 @@ driver.get("https://ghsprod.service-now.com/nav_to.do?uri=%2Fcatalog_home.do%3Fs
 driver.switch_to.default_content()
 
 # Search for the 1st computer
-searchbox = driver.find_element_by_xpath("//*[@id='sysparm_search']")
-searchbox.click()
-searchbox.send_keys(computers[0])
-searchbox.send_keys(Keys.RETURN)
+search(computers[0])
 
 # Switch to main content iframe
 driver.switch_to.frame(driver.find_element_by_class_name("navpage-main-left").find_element_by_xpath(".//iframe"))
