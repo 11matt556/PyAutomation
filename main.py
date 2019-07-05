@@ -30,10 +30,11 @@ def submitTicket(bool):
     # print(' Save button is here: ' + str(saveButton))
 
     if bool == 'true':
-        actions.move_to_element(saveButton)
-        actions.click(saveButton)
-        actions.perform()
-        actions.reset_actions()
+        saveButton.click()
+        #actions.move_to_element(saveButton)
+        #actions.click(saveButton)
+        #actions.perform()
+        #actions.reset_actions()
     else:
         print("Ticket not saved! Make sure to pass 'true' if you want to actually submit.")
 
@@ -61,18 +62,10 @@ def selTicketStateFromDropdown(status):
 
 
 def inputComment(commentString):
-    actions = webdriver.ActionChains(driver)
-    commentArea = driver.find_element_by_id('activity-stream-comments-textarea')
-    #commentArea = driver.find_element_by_xpath("//textarea[@id='activity-stream-comments-textarea']")
-    #commentArea.click()
-    #commentArea.send_keys(commentString)
-    actions.move_to_element(commentArea)
-    actions.click(commentArea)
-    actions.send_keys(commentString)
+    commentArea = driver.find_element_by_xpath("//textarea[@id='activity-stream-comments-textarea']")
+    commentArea.click()
+    commentArea.send_keys(commentString)
     print("Typing " + str(commentString))
-    actions.perform()
-    actions.reset_actions()
-
 
 #
 #
