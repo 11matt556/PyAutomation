@@ -10,10 +10,12 @@ import csv
 driver = webdriver.Chrome()
 saveTicket = False
 driver.implicitly_wait(3)
-
-
+timeToSleep = 0
 # End global variables
+
 # Start Functions
+
+
 def submitTicket():
     actions = webdriver.ActionChains(driver)
     # print("Switch to iframe")
@@ -31,12 +33,13 @@ def submitTicket():
 
     if saveTicket:
         saveButton.click()
+        print("Ticked saved.")
     else:
-        print("Ticket not saved! Make sure to pass 'true' if you want to actually submit.")
+        print("Ticket not saved! Make sure to set the saveTicket variable to True if you want to actually submit changes to the ticket.")
 
 
 def importCSV(inputCSV):
-     with open(inputCSV) as csv_file:
+    with open(inputCSV) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         line_count = 0
         outputArray = []
@@ -47,133 +50,135 @@ def importCSV(inputCSV):
             #if row[2]:
             #    ritm = row[2]
             outputArray.append(serial)
-            print(row)
+            print("Processing: " + str(row))
             line_count += 1
-        print(f'Processed {line_count} lines.')
+        print(f'Processed {line_count} lines:')
+        print("Result: " + str(outputArray))
         return outputArray
 
 
-
-def writeToCSV(rowArray, csvFile):
-    with open(csvFile, 'w') as writeFile:
+def appendToCSV(rowArray, csvFile):
+    with open(csvFile, 'a') as writeFile:
         writer = csv.writer(writeFile)
         writer.writerow(rowArray)
     writeFile.close()
 
 
+def clearCSV(csvFile):
+    writeFile = open(csvFile, "w+")
+    writeFile.close()
+
 # Valid tasks are Restock, Repair or Decommission
 def selTaskTypeFromDropdown(task):
+    print("Setting ticket task as " + task)
     driver.find_elements_by_xpath("//div[@class='sc_variable_editor']")[1].find_element_by_class_name(
         "input_controls").find_element_by_xpath("//option[. = '" + task + "']").click()
 
 
 def selTicketStateFromDropdown(status):
+    print("Setting ticket state to " + status)
     driver.find_element_by_id('sc_task.state').find_element_by_xpath("//option[. = '" + status + "']").click()
 
 
 def inputComment(commentString):
-    commentArea = driver.find_element_by_xpath("//textarea[@id='activity-stream-comments-textarea']")
-    commentArea.click()
-    commentArea.send_keys(commentString)
     print("Typing " + str(commentString))
+    commentArea = driver.find_element_by_xpath("//textarea[@id='activity-stream-comments-textarea']")
+    # commentArea.click()
+    commentArea.send_keys(commentString)
 
 
 def search(inputString):
+    print("Searching for " + inputString)
     searchbox = driver.find_element_by_xpath("//*[@id='sysparm_search']")
     searchbox.click()
     searchbox.send_keys(computers[0])
     searchbox.send_keys(Keys.RETURN)
+
+
+def saveRITMToCSV(outputCSV):
+    RITM = []
+    RITM.append(driver.find_element_by_id('sys_display.sc_task.request_item').get_attribute("value"))
+    print("Saving " + str(RITM) + " to " + outputCSV)
+    appendToCSV(RITM, outputCSV)
+
 
 #
 #
 # End Functions
 #
 #
+
+# Clear any previous runs from the csv
+clearCSV('output.csv')
+
 # Import list of computer hostnames
 computers = importCSV('input.csv')
 
 # Print out list of computer hostnames
 for i in range(len(computers)):
-    print(computers[i])
+    print("Currently working on item: " + computers[i])
 
-# Navigate to webpage
-# driver.get("https://ghsprod.service-now.com/nav_to.do?uri=%2Fsc_task.do%3Fsys_id%3D07feba5bdb1677c0d4aa710439961995%26sysparm_view%3Dtext_search%26sysparm_record_target%3Dsc_task%26sysparm_record_row%3D3%26sysparm_record_rows%3D4%26sysparm_record_list%3D123TEXTQUERY321%25253DDT2UA50516QQ")
+    # Open to service catalog
+    driver.get("https://ghsprod.service-now.com/nav_to.do?uri=%2Fcatalog_home.do%3Fsysparm_view%3Dcatalog_default")
 
-# Open to service catalog
-driver.get("https://ghsprod.service-now.com/nav_to.do?uri=%2Fcatalog_home.do%3Fsysparm_view%3Dcatalog_default")
+    # Make sure we have the default/top iframe selected
+    driver.switch_to.default_content()
 
-# Make sure we have the default/top iframe selected
-driver.switch_to.default_content()
+    # Search for the 1st computer
+    search(computers[i])
 
-# Search for the 1st computer
-search(computers[0])
+    # Switch to main content iframe
+    driver.switch_to.frame(driver.find_element_by_class_name("navpage-main-left").find_element_by_xpath(".//iframe"))
 
-# Switch to main content iframe
-driver.switch_to.frame(driver.find_element_by_class_name("navpage-main-left").find_element_by_xpath(".//iframe"))
+    # Wait until a task is selected
+    try:
+        print("Waiting for task selection")
+        element = WebDriverWait(driver, 10000).until(
+            EC.presence_of_element_located((By.ID, "activity-stream-comments-textarea"))
+        )
+    except:
+        print("No task selected. Quitting due to timeout")
 
-# Wait until a task is selected
-try:
-    print("Waiting for task selection")
-    element = WebDriverWait(driver, 10000).until(
-        EC.presence_of_element_located((By.ID, "activity-stream-comments-textarea"))
-    )
-except:
-    print("No task selected. Quitting due to timeout")
-    driver.quit()
+    time.sleep(timeToSleep)
 
-print("Wait")
-time.sleep(5)
+    # Set ticket state
+    selTicketStateFromDropdown('Work in Progress')
 
-# Set ticket state
-selTicketStateFromDropdown('Work in Progress')
+    time.sleep(timeToSleep)
 
-print("Wait")
-time.sleep(5)
+    # Enter comment
+    inputComment("Acknowledging device/asset")
 
-# Enter comment
-inputComment("Acknowledging device/asset")
+    time.sleep(timeToSleep)
 
-print("Wait")
-time.sleep(5)
+    # Save ticket
+    submitTicket()
 
-# Save ticket
-submitTicket()
+    time.sleep(timeToSleep)
 
-print("Wait")
-time.sleep(5)
+    driver.switch_to.default_content()
+    # Switch to main content iframe
+    driver.switch_to.frame(driver.find_element_by_class_name("navpage-main-left").find_element_by_xpath(".//iframe"))
 
-driver.switch_to.default_content()
-# Switch to main content iframe
-driver.switch_to.frame(driver.find_element_by_class_name("navpage-main-left").find_element_by_xpath(".//iframe"))
+    # Set ticket state
+    selTicketStateFromDropdown('Closed Complete')
 
-# Set ticket state
-selTicketStateFromDropdown('Closed Complete')
+    time.sleep(timeToSleep)
 
-print("Wait")
-time.sleep(5)
+    #    Enter comment
+    inputComment("Device to be restocked")
 
-# Enter comment
-inputComment("Device to be restocked")
+    time.sleep(timeToSleep)
 
-print("Wait")
-time.sleep(5)
+    # Set ticket task (Restock, Decommission, or Repair)
+    selTaskTypeFromDropdown('Restock')
 
-# Set ticket task (Restock, Decommission, or Repair)
-selTaskTypeFromDropdown('Restock')
+    time.sleep(timeToSleep)
 
-print("Wait")
-time.sleep(5)
+    # Save RITM to CSV
+    saveRITMToCSV('output.csv')
 
-# Save RITM to CSV
-RITM = driver.find_element_by_id('sys_display.sc_task.request_item').get_attribute("value")
-print(RITM)
-writeToCSV(RITM, 'output.csv')
+    time.sleep(timeToSleep)
 
-print("Wait")
-time.sleep(5)
-
-# Save ticket
-submitTicket()
-
-print("Wait")
-time.sleep(5)
+    # Save ticket
+    submitTicket()
