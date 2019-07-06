@@ -8,14 +8,13 @@ import csv
 
 # Start global variables
 driver = webdriver.Chrome()
-#actions = webdriver.ActionChains(driver)
-
+saveTicket = False
 driver.implicitly_wait(3)
 
 
 # End global variables
 # Start Functions
-def submitTicket(really):
+def submitTicket():
     actions = webdriver.ActionChains(driver)
     # print("Switch to iframe")
     # driver.switch_to.frame(driver.find_element_by_class_name("navpage-main-left").find_element_by_xpath(".//iframe"))
@@ -30,12 +29,8 @@ def submitTicket(really):
     saveButton = driver.find_element_by_xpath("//div[@id='context_1']/div[2]")
     # print(' Save button is here: ' + str(saveButton))
 
-    if really == 'true':
+    if saveTicket:
         saveButton.click()
-        #actions.move_to_element(saveButton)
-        #actions.click(saveButton)
-        #actions.perform()
-        #actions.reset_actions()
     else:
         print("Ticket not saved! Make sure to pass 'true' if you want to actually submit.")
 
@@ -94,7 +89,6 @@ def search(inputString):
 # End Functions
 #
 #
-
 # Import list of computer hostnames
 computers = importCSV('input.csv')
 
@@ -143,7 +137,7 @@ print("Wait")
 time.sleep(5)
 
 # Save ticket
-submitTicket('true')
+submitTicket()
 
 print("Wait")
 time.sleep(5)
@@ -179,7 +173,7 @@ print("Wait")
 time.sleep(5)
 
 # Save ticket
-submitTicket('true')
+submitTicket()
 
 print("Wait")
 time.sleep(5)
