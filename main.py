@@ -75,6 +75,7 @@ def selTaskTypeFromDropdown(task):
         "input_controls").find_element_by_xpath("//option[. = '" + task + "']").click()
 
 
+# Valid status are is 'Open' , 'Work in Progress' , 'Closed Complete' , 'Closed Incomplete' , and 'Pending'
 def selTicketStateFromDropdown(status):
     print("Setting ticket state to " + status)
     driver.find_element_by_id('sc_task.state').find_element_by_xpath("//option[. = '" + status + "']").click()
@@ -91,7 +92,7 @@ def search(inputString):
     print("Searching for " + inputString)
     searchbox = driver.find_element_by_xpath("//*[@id='sysparm_search']")
     searchbox.click()
-    searchbox.send_keys(computers[0])
+    searchbox.send_keys(inputString)
     searchbox.send_keys(Keys.RETURN)
 
 
@@ -121,6 +122,12 @@ for i in range(len(computers)):
     # Open to service catalog
     driver.get("https://ghsprod.service-now.com/nav_to.do?uri=%2Fcatalog_home.do%3Fsysparm_view%3Dcatalog_default")
 
+    if i > 0:
+        print("Accepting dialog box regarding unsaved changes")
+        alertObj = driver.switch_to.alert
+        alertObj.accept()
+
+
     # Make sure we have the default/top iframe selected
     driver.switch_to.default_content()
 
@@ -147,7 +154,7 @@ for i in range(len(computers)):
     time.sleep(timeToSleep)
 
     # Enter comment
-    inputComment("Acknowledging device/asset")
+    inputComment("Acknowledging asset/ticket")
 
     time.sleep(timeToSleep)
 
@@ -166,7 +173,7 @@ for i in range(len(computers)):
     time.sleep(timeToSleep)
 
     #    Enter comment
-    inputComment("Device to be restocked")
+    inputComment("Device to be restocked, SSO Imprivata Project G2-G4 Minis")
 
     time.sleep(timeToSleep)
 
