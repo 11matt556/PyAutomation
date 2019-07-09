@@ -84,7 +84,6 @@ def selTicketStateFromDropdown(status):
 def inputComment(commentString):
     print("Typing " + str(commentString))
     commentArea = driver.find_element_by_xpath("//textarea[@id='activity-stream-comments-textarea']")
-    # commentArea.click()
     commentArea.send_keys(commentString)
 
 
@@ -122,7 +121,7 @@ for i in range(len(computers)):
     # Open to service catalog
     driver.get("https://ghsprod.service-now.com/nav_to.do?uri=%2Fcatalog_home.do%3Fsysparm_view%3Dcatalog_default")
 
-    if i > 0:
+    if (i > 0 and saveTicket is False):
         print("Accepting dialog box regarding unsaved changes")
         alertObj = driver.switch_to.alert
         alertObj.accept()
@@ -172,7 +171,7 @@ for i in range(len(computers)):
 
     time.sleep(timeToSleep)
 
-    #    Enter comment
+    # Enter comment
     inputComment("Device to be restocked, SSO Imprivata Project G2-G4 Minis")
 
     time.sleep(timeToSleep)
