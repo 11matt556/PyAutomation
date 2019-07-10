@@ -3,6 +3,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+import selenium.common.exceptions as seleniumExceptions
+
 import time
 import csv
 
@@ -84,6 +86,7 @@ def selTicketStateFromDropdown(status):
 def inputComment(commentString):
     print("Typing " + str(commentString))
     commentArea = driver.find_element_by_xpath("//textarea[@id='activity-stream-comments-textarea']")
+    # commentArea.click()
     commentArea.send_keys(commentString)
 
 
@@ -102,36 +105,13 @@ def saveRITMToCSV(outputCSV):
     appendToCSV(RITM, outputCSV)
 
 
-#
-#
-# End Functions
-#
-#
-
-# Clear any previous runs from the csv
-clearCSV('output.csv')
-
-# Import list of computer hostnames
-computers = importCSV('input.csv')
-
-# Print out list of computer hostnames
-for i in range(len(computers)):
-    print("Currently working on item: " + computers[i])
-
-    # Open to service catalog
-    driver.get("https://ghsprod.service-now.com/nav_to.do?uri=%2Fcatalog_home.do%3Fsysparm_view%3Dcatalog_default")
-
-    if (i > 0 and saveTicket is False):
-        print("Accepting dialog box regarding unsaved changes")
-        alertObj = driver.switch_to.alert
-        alertObj.accept()
-
+def restockItem(item):
 
     # Make sure we have the default/top iframe selected
     driver.switch_to.default_content()
 
     # Search for the 1st computer
-    search(computers[i])
+    search(item)
 
     # Switch to main content iframe
     driver.switch_to.frame(driver.find_element_by_class_name("navpage-main-left").find_element_by_xpath(".//iframe"))
@@ -154,12 +134,10 @@ for i in range(len(computers)):
 
     # Enter comment
     inputComment("Acknowledging asset/ticket")
-
     time.sleep(timeToSleep)
 
     # Save ticket
     submitTicket()
-
     time.sleep(timeToSleep)
 
     driver.switch_to.default_content()
@@ -168,23 +146,52 @@ for i in range(len(computers)):
 
     # Set ticket state
     selTicketStateFromDropdown('Closed Complete')
-
     time.sleep(timeToSleep)
 
-    # Enter comment
+    #    Enter comment
     inputComment("Device to be restocked, SSO Imprivata Project G2-G4 Minis")
-
     time.sleep(timeToSleep)
 
     # Set ticket task (Restock, Decommission, or Repair)
     selTaskTypeFromDropdown('Restock')
-
     time.sleep(timeToSleep)
 
     # Save RITM to CSV
     saveRITMToCSV('output.csv')
-
     time.sleep(timeToSleep)
 
     # Save ticket
     submitTicket()
+
+#
+#
+# End Functions
+#
+#
+
+# Clear any previous runs from the csv
+clearCSV('output.csv')
+
+# Import list of computer hostnames
+computers = importCSV('input.csv')
+
+# Print out list of computer hostnames
+for i in range(len(computers)):
+    print("Currently working on item: " + computers[i])
+
+    # Open to service catalog
+    driver.get("https://ghsprod.service-now.com/nav_to.do?uri=%2Fcatalog_home.do%3Fsysparm_view%3Dcatalog_default")
+
+    try:
+        WebDriverWait(driver, 3).until(EC.alert_is_present(), 'Timed out waiting for confirmation popup to appear.')
+        alert = driver.switch_to.alert
+        alert.accept()
+        print("Accepted Alert")
+    except seleniumExceptions.TimeoutException as e:
+        print("No alert to accept")
+
+    try:
+        restockItem(computers[i])
+    except Exception as bad:
+        print("Something went wrong!")
+        print(bad)
