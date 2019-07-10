@@ -127,6 +127,10 @@ def restockItem(item):
 
     time.sleep(timeToSleep)
 
+    # Make sure the ticket is Open
+    assert str(driver.find_element_by_id('sc_task.state').text) is 'Open'
+    time.sleep(timeToSleep)
+
     # Set ticket state
     selTicketStateFromDropdown('Work in Progress')
 
@@ -177,7 +181,7 @@ computers = importCSV('input.csv')
 
 # Print out list of computer hostnames
 for i in range(len(computers)):
-    print("Currently working on item: " + computers[i])
+    print("-==========- " + computers[i] + " -==========-")
 
     # Open to service catalog
     driver.get("https://ghsprod.service-now.com/nav_to.do?uri=%2Fcatalog_home.do%3Fsysparm_view%3Dcatalog_default")
@@ -193,5 +197,5 @@ for i in range(len(computers)):
     try:
         restockItem(computers[i])
     except Exception as bad:
-        print("Something went wrong!")
-        print(bad)
+        print("Error in item: " + computers[i])
+        print("\t"+repr(bad))
