@@ -131,6 +131,9 @@ def restockItem(item):
     assert str(driver.find_element_by_id('sc_task.state').text) is 'Open'
     time.sleep(timeToSleep)
 
+    # Make sure the tivcket is assigned to Bryan or John
+    assert str(driver.find_element_by_id('sys_display.sc_task.assigned_to').text) is ('Bryan Shain' or 'John Higman')
+
     # Set ticket state
     selTicketStateFromDropdown('Work in Progress')
 
