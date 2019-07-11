@@ -238,12 +238,12 @@ def repairItem(item):
     time.sleep(timeToSleep)
 
     # Make sure the ticket is Open
-    if getTicketState() != 'Open':
-        raise Exception
+    #if getTicketState() != 'Open':
+    #    raise Exception
 
     # Make sure the ticket is assigned to Bryan or John
-    if getTicketAssigned() != ('Bryan Shain' or 'John Higman'):
-        raise Exception
+    #if getTicketAssigned() != ('Bryan Shain' or 'John Higman'):
+    #    raise Exception
 
     setTicketState('Work in Progress')
 
@@ -299,6 +299,10 @@ def repairItem(item):
 
     # onsite corresponds to "Repair Completed" as opposed to a decom repair
     setRepairType('onsite')
+
+    # Save RITM for current item to CSV
+    appendToCSV([item,getRITM()], 'output.csv')
+    print("RITM for " + item + " is " + getRITM())
 
     submitTicket()
 #
