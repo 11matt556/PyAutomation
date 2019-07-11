@@ -106,6 +106,7 @@ def inputComment(commentString):
 def search(inputString):
     print("Searching for " + inputString)
     searchbox = driver.find_element_by_xpath("//*[@id='sysparm_search']")
+    searchbox.clear()
     searchbox.click()
     searchbox.send_keys(inputString)
     searchbox.send_keys(Keys.RETURN)
@@ -132,7 +133,7 @@ def restockItem(item):
     search(item)
 
     # Switch to main content iframe
-    driver.switch_to.frame(driver.find_element_by_class_name("navpage-main-left").find_element_by_xpath(".//iframe"))
+    switchToMainFrame()
 
     # Wait until a task is selected
     try:
@@ -208,13 +209,71 @@ def getRepairTypeObj():
 def setRepairType(str):
     selenium.webdriver.support.select.Select(driver.find_element_by_xpath("//div[2]/table/tbody/tr/td/div/div/div/div[2]/select")).select_by_value(str)
 
+def setRepairLocation(str):
+    selenium.webdriver.support.select.Select(driver.find_element_by_xpath("//tr[3]/td/div/div/div/div[2]/select")).select_by_value(str)
+
+def waitForTaskSelection():
+    try:
+        print("Waiting for task selection")
+        element = WebDriverWait(driver, 10000).until(
+            EC.presence_of_element_located((By.ID, "activity-stream-comments-textarea"))
+            )
+    except:
+        print("No task selected. Quitting due to timeout")
 
 def repairItem(item):
     #driver.get("https://ghsprod.service-now.com/nav_to.do?uri=%2Fsc_task.do%3Fsys_id%3D86f33381db6c93c8cf1fa961ca9619c1%26sysparm_view%3Dtext_search%26sysparm_record_target%3Dsc_task%26sysparm_record_row%3D1%26sysparm_record_rows%3D4362%26sysparm_record_list%3D123TEXTQUERY321%25253Drhs_repair")
 
+    # Make sure we have the default/top iframe selected
+    driver.switch_to.default_content()
+
+    # Search for the computer
+    search(item)
+
+    # Switch to main content iframe
+    switchToMainFrame()
+
+    # Wait until a task is selected
+    waitForTaskSelection()
+    time.sleep(timeToSleep)
+
+    # Make sure the ticket is Open
+    if getTicketState() != 'Open':
+        raise Exception
+
+    # Make sure the ticket is assigned to Bryan or John
+    if getTicketAssigned() != ('Bryan Shain' or 'John Higman'):
+        raise Exception
+
+    setTicketState('Work in Progress')
+
+    inputComment('Acknowledging asset/ticket')
+
+    submitTicket()
+
+    setTicketState('Closed Complete')
+
+    inputComment('Device to be repaired with SSD swapout; SSO Imprivata Project USDT Devices')
+
+    setTaskType('Repair')
+
+    setRepairLocation('Yes')
+
+    submitTicket()
+
+    ritm = getRITM()
+
     switchToDefaultFrame()
 
-    search("RITM0473925")
+    search(ritm)
+
+    try:
+        WebDriverWait(driver, 3).until(EC.alert_is_present(), 'Timed out waiting for confirmation popup to appear.')
+        alert = driver.switch_to.alert
+        alert.accept()
+        print("Accepted Alert")
+    except seleniumExceptions.TimeoutException as e:
+        print("No alert to accept")
 
     switchToMainFrame()
 
