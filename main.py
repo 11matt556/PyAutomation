@@ -139,7 +139,7 @@ def restockItem(item):
         print("Waiting for task selection")
         element = WebDriverWait(driver, 10000).until(
             EC.presence_of_element_located((By.ID, "activity-stream-comments-textarea"))
-        )
+            )
     except:
         print("No task selected. Quitting due to timeout")
 
@@ -210,16 +210,38 @@ def setRepairType(str):
 
 
 def repairItem(item):
-    driver.get("https://ghsprod.service-now.com/nav_to.do?uri=%2Fsc_task.do%3Fsys_id%3D86f33381db6c93c8cf1fa961ca9619c1%26sysparm_view%3Dtext_search%26sysparm_record_target%3Dsc_task%26sysparm_record_row%3D1%26sysparm_record_rows%3D4362%26sysparm_record_list%3D123TEXTQUERY321%25253Drhs_repair")
+    #driver.get("https://ghsprod.service-now.com/nav_to.do?uri=%2Fsc_task.do%3Fsys_id%3D86f33381db6c93c8cf1fa961ca9619c1%26sysparm_view%3Dtext_search%26sysparm_record_target%3Dsc_task%26sysparm_record_row%3D1%26sysparm_record_rows%3D4362%26sysparm_record_list%3D123TEXTQUERY321%25253Drhs_repair")
+
+    switchToDefaultFrame()
+
+    search("RITM0473925")
 
     switchToMainFrame()
+
+    driver.find_element(By.LINK_TEXT, "Click here").click()
+    #driver.find_element_by_xpath("//div[@id='output_messages']/div/div/div/a").click()
+    # Wait until a task is selected
+    try:
+        print("Waiting for task selection")
+        element = WebDriverWait(driver, 10000).until(
+            EC.presence_of_element_located((By.ID, "activity-stream-comments-textarea"))
+            )
+    except:
+        print("No task selected. Quitting due to timeout")
+
+    inputComment("Device to be repaired with SSD swapout; SSO Imprivata Project USDT Devices")
 
     #print(driver.find_elements_by_xpath("//div[@class='sc_variable_editor']")[1].find_element_by_class_name("input_controls"))
     #print(driver.find_element_by_xpath(("//div[2]/table/tbody/tr/td/div/div/div/div[2]/select")))
 
-    print(getRepairTypeStr())
-    setRepairType('decommission')
+    setTicketState('Closed Complete')
 
+    # print(getRepairTypeStr())
+
+    # onsite corresponds to "Repair Completed" as opposed to a decom repair
+    setRepairType('onsite')
+
+    submitTicket()
 #
 #
 # End Functions
@@ -248,8 +270,8 @@ for i in range(len(computers)):
         print("No alert to accept")
 
     try:
-        restockItem(computers[i])
-        #repairItem(computers[i])
+        #restockItem(computers[i])
+        repairItem(computers[i])
     except Exception as bad:
         print("Error in item: " + computers[i])
         print("\t"+repr(bad))
