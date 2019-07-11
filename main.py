@@ -16,7 +16,7 @@ saveTicket = False
 driver.implicitly_wait(3)
 timeToSleep = 0
 reviewRequired = []
-verboseLog = False
+verboseLog = True
 # End global variables
 
 # Start Functions
@@ -89,7 +89,7 @@ def setTicketState(status):
 
 
 def getTicketState():
-    return str(webdriver.support.select.Select(driver.find_element_by_id('sc_task.state')).first_selected_option.text)
+    return str(selenium.webdriver.support.select.Select(driver.find_element_by_id('sc_task.state')).first_selected_option.text)
 
 
 def getTicketAssigned():
@@ -110,8 +110,17 @@ def search(inputString):
     searchbox.send_keys(inputString)
     searchbox.send_keys(Keys.RETURN)
 
+
 def getRITM():
     return driver.find_element_by_id('sys_display.sc_task.request_item').get_attribute("value")
+
+
+def switchToMainFrame():
+    driver.switch_to.frame(driver.find_element_by_class_name("navpage-main-left").find_element_by_xpath(".//iframe"))
+
+
+def switchToDefaultFrame():
+    driver.switch_to.default_content()
 
 
 def restockItem(item):
@@ -189,6 +198,28 @@ def restockItem(item):
     # Save ticket
     submitTicket()
 
+# Returns a string, not the actual object
+def getRepairTypeStr():
+    return getRepairTypeObj()
+
+def getRepairTypeObj():
+    pass
+
+def setRepairType(str):
+    selenium.webdriver.support.select.Select(driver.find_element_by_xpath("//div[2]/table/tbody/tr/td/div/div/div/div[2]/select")).select_by_value(str)
+
+
+def repairItem(item):
+    driver.get("https://ghsprod.service-now.com/nav_to.do?uri=%2Fsc_task.do%3Fsys_id%3D86f33381db6c93c8cf1fa961ca9619c1%26sysparm_view%3Dtext_search%26sysparm_record_target%3Dsc_task%26sysparm_record_row%3D1%26sysparm_record_rows%3D4362%26sysparm_record_list%3D123TEXTQUERY321%25253Drhs_repair")
+
+    switchToMainFrame()
+
+    #print(driver.find_elements_by_xpath("//div[@class='sc_variable_editor']")[1].find_element_by_class_name("input_controls"))
+    #print(driver.find_element_by_xpath(("//div[2]/table/tbody/tr/td/div/div/div/div[2]/select")))
+
+    print(getRepairTypeStr())
+    setRepairType('decommission')
+
 #
 #
 # End Functions
@@ -218,6 +249,7 @@ for i in range(len(computers)):
 
     try:
         restockItem(computers[i])
+        #repairItem(computers[i])
     except Exception as bad:
         print("Error in item: " + computers[i])
         print("\t"+repr(bad))
