@@ -138,11 +138,12 @@ def restockItem(item):
     time.sleep(timeToSleep)
 
     # Make sure the ticket is Open
-    print(str(getTicketState()))
-    assert getTicketState() == 'Open'
+    if getTicketState() != 'Open':
+        raise Exception
 
     # Make sure the ticket is assigned to Bryan or John
-    assert getTicketAssigned() == ('Bryan Shain' or 'John Higman')
+    if getTicketAssigned() != ('Bryan Shain' or 'John Higman'):
+        raise Exception
 
     # Set ticket state
     setTicketState('Work in Progress')
@@ -153,7 +154,7 @@ def restockItem(item):
     try:
         inputComment("Acknowledging asset/ticket")
         time.sleep(timeToSleep)
-    except seleniumExceptions.ElementNotInteractableException as err:
+    except seleniumExceptions.ElementNotInteractableException:
         driver.find_element_by_xpath("//span[2]/span/nav/div/div[2]/span/button").click()
 
     # Save ticket
@@ -169,7 +170,7 @@ def restockItem(item):
     setTicketState('Closed Complete')
     time.sleep(timeToSleep)
 
-    #    Enter comment
+    # Enter comment
     inputComment("Device to be restocked, SSO Imprivata Project G2-G4 Minis")
     time.sleep(timeToSleep)
 
