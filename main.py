@@ -15,6 +15,8 @@ driver = webdriver.Chrome()
 saveTicket = False
 driver.implicitly_wait(3)
 timeToSleep = 0
+reviewRequired = []
+verboseLog = False
 # End global variables
 
 # Start Functions
@@ -72,6 +74,7 @@ def clearCSV(csvFile):
     writeFile = open(csvFile, "w+")
     writeFile.close()
 
+
 # Valid tasks are Restock, Repair or Decommission
 def setTaskType(task):
     print("Setting ticket task as " + task)
@@ -107,12 +110,8 @@ def search(inputString):
     searchbox.send_keys(inputString)
     searchbox.send_keys(Keys.RETURN)
 
-
-def saveRITMToCSV(outputCSV):
-    RITM = []
-    RITM.append(driver.find_element_by_id('sys_display.sc_task.request_item').get_attribute("value"))
-    print("Saving " + str(RITM) + " to " + outputCSV)
-    appendToCSV(RITM, outputCSV)
+def getRITM():
+    return driver.find_element_by_id('sys_display.sc_task.request_item').get_attribute("value")
 
 
 def restockItem(item):
@@ -179,7 +178,12 @@ def restockItem(item):
     time.sleep(timeToSleep)
 
     # Save RITM to CSV
-    saveRITMToCSV('output.csv')
+    # saveRITMToCSV('output.csv')
+
+    # Save RITM for current item to CSV
+    appendToCSV([item,getRITM()], 'output.csv')
+    print("RITM for " + item + " is " + getRITM())
+
     time.sleep(timeToSleep)
 
     # Save ticket
@@ -217,4 +221,13 @@ for i in range(len(computers)):
     except Exception as bad:
         print("Error in item: " + computers[i])
         print("\t"+repr(bad))
-        traceback.print_tb(bad.__traceback__)
+        reviewRequired.append(computers[i])
+        if verboseLog:
+            traceback.print_tb(bad.__traceback__)
+
+if reviewRequired:
+    clearCSV('review.csv')
+    print("THE FOLLOWING ITEMS REQUIRE MANUAL REVIEW! A copy has been saved to review.csv")
+    for x in range(len(reviewRequired)):
+        print("\t"+reviewRequired[x])
+        appendToCSV([reviewRequired[x]], 'review.csv')
