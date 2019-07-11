@@ -4,6 +4,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 import selenium.common.exceptions as seleniumExceptions
+import selenium.webdriver.support.select
+import traceback
 
 import time
 import csv
@@ -71,16 +73,24 @@ def clearCSV(csvFile):
     writeFile.close()
 
 # Valid tasks are Restock, Repair or Decommission
-def selTaskTypeFromDropdown(task):
+def setTaskType(task):
     print("Setting ticket task as " + task)
     driver.find_elements_by_xpath("//div[@class='sc_variable_editor']")[1].find_element_by_class_name(
         "input_controls").find_element_by_xpath("//option[. = '" + task + "']").click()
 
 
 # Valid status are is 'Open' , 'Work in Progress' , 'Closed Complete' , 'Closed Incomplete' , and 'Pending'
-def selTicketStateFromDropdown(status):
+def setTicketState(status):
     print("Setting ticket state to " + status)
     driver.find_element_by_id('sc_task.state').find_element_by_xpath("//option[. = '" + status + "']").click()
+
+
+def getTicketState():
+    return str(webdriver.support.select.Select(driver.find_element_by_id('sc_task.state')).first_selected_option.text)
+
+
+def getTicketAssigned():
+    return str(driver.find_element_by_id('sys_display.sc_task.assigned_to').get_attribute("value"))
 
 
 def inputComment(commentString):
@@ -128,31 +138,35 @@ def restockItem(item):
     time.sleep(timeToSleep)
 
     # Make sure the ticket is Open
-    assert str(driver.find_element_by_id('sc_task.state').text) is 'Open'
-    time.sleep(timeToSleep)
+    print(str(getTicketState()))
+    assert getTicketState() == 'Open'
 
-    # Make sure the tivcket is assigned to Bryan or John
-    assert str(driver.find_element_by_id('sys_display.sc_task.assigned_to').text) is ('Bryan Shain' or 'John Higman')
+    # Make sure the ticket is assigned to Bryan or John
+    assert getTicketAssigned() == ('Bryan Shain' or 'John Higman')
 
     # Set ticket state
-    selTicketStateFromDropdown('Work in Progress')
-
+    setTicketState('Work in Progress')
     time.sleep(timeToSleep)
 
     # Enter comment
-    inputComment("Acknowledging asset/ticket")
-    time.sleep(timeToSleep)
+    # Sometimes the comment box area is collapsed by default, so we must click the button to expand it first
+    try:
+        inputComment("Acknowledging asset/ticket")
+        time.sleep(timeToSleep)
+    except seleniumExceptions.ElementNotInteractableException as err:
+        driver.find_element_by_xpath("//span[2]/span/nav/div/div[2]/span/button").click()
 
     # Save ticket
     submitTicket()
     time.sleep(timeToSleep)
 
     driver.switch_to.default_content()
+
     # Switch to main content iframe
     driver.switch_to.frame(driver.find_element_by_class_name("navpage-main-left").find_element_by_xpath(".//iframe"))
 
     # Set ticket state
-    selTicketStateFromDropdown('Closed Complete')
+    setTicketState('Closed Complete')
     time.sleep(timeToSleep)
 
     #    Enter comment
@@ -160,7 +174,7 @@ def restockItem(item):
     time.sleep(timeToSleep)
 
     # Set ticket task (Restock, Decommission, or Repair)
-    selTaskTypeFromDropdown('Restock')
+    setTaskType('Restock')
     time.sleep(timeToSleep)
 
     # Save RITM to CSV
@@ -202,3 +216,4 @@ for i in range(len(computers)):
     except Exception as bad:
         print("Error in item: " + computers[i])
         print("\t"+repr(bad))
+        traceback.print_tb(bad.__traceback__)
