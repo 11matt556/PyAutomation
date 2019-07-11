@@ -200,10 +200,10 @@ def restockItem(item):
 
 # Returns a string, not the actual object
 def getRepairTypeStr():
-    return getRepairTypeObj()
+    return str(getRepairTypeObj().first_selected_option.text)
 
 def getRepairTypeObj():
-    pass
+    return selenium.webdriver.support.select.Select(driver.find_element_by_xpath("//div[2]/table/tbody/tr/td/div/div/div/div[2]/select"))
 
 def setRepairType(str):
     selenium.webdriver.support.select.Select(driver.find_element_by_xpath("//div[2]/table/tbody/tr/td/div/div/div/div[2]/select")).select_by_value(str)
