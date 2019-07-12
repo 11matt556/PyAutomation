@@ -188,7 +188,7 @@ def restockItem(item):
     time.sleep(timeToSleep)
 
     # Save RITM for current item to CSV
-    appendToCSV([item,getRITM()], 'output.csv')
+    appendToCSV(['', item, getRITM(), 'Restock'], 'output.csv')
     print("RITM for " + item + " is " + getRITM())
 
     time.sleep(timeToSleep)
@@ -298,7 +298,7 @@ def repairItem(item):
     setRepairType('onsite')
 
     # Save RITM for current item to CSV
-    appendToCSV([item,getRITM()], 'output.csv')
+    appendToCSV(['', item, getRITM(), 'Repair'], 'output.csv')
     print("RITM for " + item + " is " + getRITM())
 
     submitTicket()
@@ -311,9 +311,12 @@ def repairItem(item):
 # Clear any previous runs from the csv
 clearCSV('output.csv')
 
+# Set up CSV as Tim's script expects it
+appendToCSV(['SN','PC Name','RITM','Restock/Repair','Label Notes'],'output.csv')
+
+
 # Import list of computer hostnames
 computers = importCSV('input.csv')
-
 # Print out list of computer hostnames
 for i in range(len(computers)):
     print("-==========- " + computers[i] + " -==========-")
