@@ -17,6 +17,7 @@ driver.implicitly_wait(3)
 timeToSleep = 0
 reviewRequired = []
 verboseLog = True
+taskType = None
 # End global variables
 
 # Start Functions
@@ -61,6 +62,7 @@ def setTaskType(task):
     print("Setting ticket task as " + task)
     driver.find_elements_by_xpath("//div[@class='sc_variable_editor']")[1].find_element_by_class_name(
         "input_controls").find_element_by_xpath("//option[. = '" + task + "']").click()
+
 
 # Set the status of the ticket
 # Valid status are 'Open' , 'Work in Progress' , 'Closed Complete' , 'Closed Incomplete' , and 'Pending'
@@ -110,20 +112,21 @@ def submitTicket():
 # === CSV HELPER FUNCTIONS === #
 
 def importCSV(inputCSV):
+    print("Importing items...")
     with open(inputCSV) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         line_count = 0
         outputArray = []
         for row in csv_reader:
-            serial = row[0]
+            #serial = row[0]
             #if row[1]:
             #    host = row[1]
             #if row[2]:
             #    ritm = row[2]
-            outputArray.append(serial)
-            print("Processing: " + str(row))
+            outputArray.append(row[0])
+            print("Importing line: " + str(row))
             line_count += 1
-        print(f'Processed {line_count} lines:')
+        print(f'Imported {line_count} items')
         print("Result: " + str(outputArray))
         return outputArray
 
@@ -157,6 +160,28 @@ def switchToMainFrame():
 def switchToDefaultFrame():
     driver.switch_to.default_content()
 
+
+def waitForAlert():
+    try:
+        WebDriverWait(driver, 1).until(EC.alert_is_present(), 'Timed out waiting for confirmation popup to appear.')
+        alertObj = driver.switch_to.alert
+        alertObj.accept()
+        print("Accepted Alert")
+    except seleniumExceptions.TimeoutException as e:
+        #print("No alert to accept")
+        pass
+
+
+def waitForTaskSelection():
+    try:
+        print("Waiting for task selection")
+        element = WebDriverWait(driver, 10000).until(
+            EC.presence_of_element_located((By.ID, "activity-stream-comments-textarea"))
+            )
+    except:
+        print("No task selected. Quitting due to timeout")
+
+
 # === MAIN TASK FUNCTIONS === #
 
 def restockItem(item):
@@ -171,13 +196,7 @@ def restockItem(item):
     switchToMainFrame()
 
     # Wait until a task is selected
-    try:
-        print("Waiting for task selection")
-        element = WebDriverWait(driver, 10000).until(
-            EC.presence_of_element_located((By.ID, "activity-stream-comments-textarea"))
-            )
-    except:
-        print("No task selected. Quitting due to timeout")
+    waitForTaskSelection()
 
     time.sleep(timeToSleep)
 
@@ -231,14 +250,6 @@ def restockItem(item):
     # Save ticket
     submitTicket()
 
-def waitForTaskSelection():
-    try:
-        print("Waiting for task selection")
-        element = WebDriverWait(driver, 10000).until(
-            EC.presence_of_element_located((By.ID, "activity-stream-comments-textarea"))
-            )
-    except:
-        print("No task selected. Quitting due to timeout")
 
 def repairItem(item):
     #driver.get("https://ghsprod.service-now.com/nav_to.do?uri=%2Fsc_task.do%3Fsys_id%3D86f33381db6c93c8cf1fa961ca9619c1%26sysparm_view%3Dtext_search%26sysparm_record_target%3Dsc_task%26sysparm_record_row%3D1%26sysparm_record_rows%3D4362%26sysparm_record_list%3D123TEXTQUERY321%25253Drhs_repair")
@@ -286,26 +297,14 @@ def repairItem(item):
 
     search(ritm)
 
-    try:
-        WebDriverWait(driver, 1).until(EC.alert_is_present(), 'Timed out waiting for confirmation popup to appear.')
-        alert = driver.switch_to.alert
-        alert.accept()
-        print("Accepted Alert")
-    except seleniumExceptions.TimeoutException as e:
-        print("No alert to accept")
+    waitForAlert()
 
     switchToMainFrame()
 
     driver.find_element(By.LINK_TEXT, "Click here").click()
-    #driver.find_element_by_xpath("//div[@id='output_messages']/div/div/div/a").click()
+
     # Wait until a task is selected
-    try:
-        print("Waiting for task selection")
-        element = WebDriverWait(driver, 10000).until(
-            EC.presence_of_element_located((By.ID, "activity-stream-comments-textarea"))
-            )
-    except:
-        print("No task selected. Quitting due to timeout")
+    waitForTaskSelection()
 
     setComment("Device to be repaired with SSD swapout; SSO Imprivata Project USDT Devices")
 
@@ -336,37 +335,47 @@ clearCSV('output.csv')
 # Set up CSV as Tim's script expects it
 appendToCSV(['SN','PC Name','RITM','Restock/Repair','Label Notes'],'output.csv')
 
-
-# Import list of computer hostnames
+# Import list of computer hostnames from csv
 computers = importCSV('input.csv')
-# Print out list of computer hostnames
+
+# Prompt user for type of ticket
+taskType = input("\nWhat should I do with these items?\n1 = Restock, 2 = Repair (ISC), 3 = Repair (MDC), 4 = Decommission\n")
+
+# Iterate through each item and do the things
 for i in range(len(computers)):
     print("-==========- " + computers[i] + " -==========-")
     print(str(i+1) + " of " + str(len(computers)))
-    # Open to service catalog
+
+    # Open to service catalog. This is to ensure each loop begins at a known starting position.
     driver.get("https://ghsprod.service-now.com/nav_to.do?uri=%2Fcatalog_home.do%3Fsysparm_view%3Dcatalog_default")
 
+    waitForAlert()
     try:
-        WebDriverWait(driver, 1).until(EC.alert_is_present(), 'Timed out waiting for confirmation popup to appear.')
-        alert = driver.switch_to.alert
-        alert.accept()
-        print("Accepted Alert")
-    except seleniumExceptions.TimeoutException as e:
-        print("No alert to accept")
-
-    try:
-        #restockItem(computers[i])
-        repairItem(computers[i])
+        if taskType == '1':
+            restockItem(computers[i])
+        if taskType == '2':
+            repairItem(computers[i])
+        if taskType == '3':
+            print("MDC Repair not yet implemented")
+            driver.close()
+            exit()
+        if taskType == '4':
+            print("Decommission Not yet implemented")
+            driver.close()
+            exit()
+        else:
+            print("Invalid selection")
+            exit()
     except Exception as bad:
         print("Error in item: " + computers[i])
         print("\t"+repr(bad))
         reviewRequired.append(computers[i])
         if verboseLog:
             traceback.print_tb(bad.__traceback__)
-
-if reviewRequired:
-    clearCSV('review.csv')
-    print("THE FOLLOWING ITEMS REQUIRE MANUAL REVIEW! A copy has been saved to review.csv")
-    for x in range(len(reviewRequired)):
-        print("\t"+reviewRequired[x])
-        appendToCSV([reviewRequired[x]], 'review.csv')
+    finally:
+        if reviewRequired:
+            clearCSV('review.csv')
+            print("THE FOLLOWING ITEMS REQUIRE MANUAL REVIEW! A copy has been saved to review.csv")
+            for x in range(len(reviewRequired)):
+                print("\t"+reviewRequired[x])
+                appendToCSV([reviewRequired[x]], 'review.csv')
