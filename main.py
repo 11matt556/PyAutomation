@@ -64,7 +64,7 @@ def importCSV(inputCSV):
 
 
 def appendToCSV(rowArray, csvFile):
-    with open(csvFile, 'a') as writeFile:
+    with open(csvFile, 'a', newline='') as writeFile:
         writer = csv.writer(writeFile)
         writer.writerow(rowArray)
     writeFile.close()
@@ -186,9 +186,6 @@ def restockItem(item):
     # Set ticket task (Restock, Decommission, or Repair)
     setTaskType('Restock')
     time.sleep(timeToSleep)
-
-    # Save RITM to CSV
-    # saveRITMToCSV('output.csv')
 
     # Save RITM for current item to CSV
     appendToCSV([item,getRITM()], 'output.csv')
