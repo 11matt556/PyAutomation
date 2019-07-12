@@ -12,7 +12,7 @@ import csv
 
 # Start global variables
 driver = webdriver.Chrome()
-saveTicket = False
+saveTicket = True
 driver.implicitly_wait(3)
 timeToSleep = 0
 reviewRequired = []
@@ -238,12 +238,12 @@ def repairItem(item):
     time.sleep(timeToSleep)
 
     # Make sure the ticket is Open
-    #if getTicketState() != 'Open':
-    #    raise Exception
+    if getTicketState() != 'Open':
+        raise Exception
 
     # Make sure the ticket is assigned to Bryan or John
-    #if getTicketAssigned() != ('Bryan Shain' or 'John Higman'):
-    #    raise Exception
+    if getTicketAssigned() != ('Bryan Shain' or 'John Higman'):
+        raise Exception
 
     setTicketState('Work in Progress')
 
@@ -268,7 +268,7 @@ def repairItem(item):
     search(ritm)
 
     try:
-        WebDriverWait(driver, 3).until(EC.alert_is_present(), 'Timed out waiting for confirmation popup to appear.')
+        WebDriverWait(driver, 1).until(EC.alert_is_present(), 'Timed out waiting for confirmation popup to appear.')
         alert = driver.switch_to.alert
         alert.accept()
         print("Accepted Alert")
@@ -320,12 +320,12 @@ computers = importCSV('input.csv')
 # Print out list of computer hostnames
 for i in range(len(computers)):
     print("-==========- " + computers[i] + " -==========-")
-
+    print(str(i+1) + " of " + str(len(computers)))
     # Open to service catalog
     driver.get("https://ghsprod.service-now.com/nav_to.do?uri=%2Fcatalog_home.do%3Fsysparm_view%3Dcatalog_default")
 
     try:
-        WebDriverWait(driver, 3).until(EC.alert_is_present(), 'Timed out waiting for confirmation popup to appear.')
+        WebDriverWait(driver, 1).until(EC.alert_is_present(), 'Timed out waiting for confirmation popup to appear.')
         alert = driver.switch_to.alert
         alert.accept()
         print("Accepted Alert")
