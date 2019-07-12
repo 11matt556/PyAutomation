@@ -21,21 +21,85 @@ verboseLog = True
 
 # Start Functions
 
+# === GETTERS === #
 
+
+def getTicketStateStr():
+    return getTicketStateObj().first_selected_option.text
+
+
+def getTicketStateObj():
+    return selenium.webdriver.support.select.Select(driver.find_element_by_id('sc_task.state'))
+
+
+def getTicketAssigned():
+    return str(driver.find_element_by_id('sys_display.sc_task.assigned_to').get_attribute("value"))
+
+
+def getRepairTypeStr():
+    return str(getRepairTypeObj().first_selected_option.text)
+
+
+def getRepairTypeObj():
+    return selenium.webdriver.support.select.Select(driver.find_element_by_xpath("//div[2]/table/tbody/tr/td/div/div/div/div[2]/select"))
+
+
+def getTicketRITMStr():
+    return getTicketRITMObj().get_attribute("value")
+
+
+def getTicketRITMObj():
+    return driver.find_element_by_id('sys_display.sc_task.request_item')
+
+
+# === SETTERS === #
+
+
+# Select the type of task
+# Valid tasks are Restock, Repair or Decommission
+def setTaskType(task):
+    print("Setting ticket task as " + task)
+    driver.find_elements_by_xpath("//div[@class='sc_variable_editor']")[1].find_element_by_class_name(
+        "input_controls").find_element_by_xpath("//option[. = '" + task + "']").click()
+
+# Set the status of the ticket
+# Valid status are 'Open' , 'Work in Progress' , 'Closed Complete' , 'Closed Incomplete' , and 'Pending'
+def setTicketState(status):
+    print("Setting ticket state to " + status)
+    driver.find_element_by_id('sc_task.state').find_element_by_xpath("//option[. = '" + status + "']").click()
+
+
+# Set the repair type for this ticket
+# Valid repair types are 'onsite' and 'decommission'
+def setRepairType(str):
+    selenium.webdriver.support.select.Select(driver.find_element_by_xpath("//div[2]/table/tbody/tr/td/div/div/div/div[2]/select")).select_by_value(str)
+
+
+# Set the repair location (IE, Can this item be repaired at ISC?)
+# Valid options are 'Yes' (This item can be repaired at ISC) or 'No' (This item must be repaired at MDC)
+def setRepairLocation(str):
+    selenium.webdriver.support.select.Select(driver.find_element_by_xpath("//tr[3]/td/div/div/div/div[2]/select")).select_by_value(str)
+
+
+# Enter commentString into the Additional Comments box
+def setComment(commentString):
+    print("Typing " + str(commentString))
+    commentArea = driver.find_element_by_xpath("//textarea[@id='activity-stream-comments-textarea']")
+    # commentArea.click()
+    commentArea.send_keys(commentString)
+
+
+# Save changes to the ticket
 def submitTicket():
     actions = webdriver.ActionChains(driver)
-    # print("Switch to iframe")
-    # driver.switch_to.frame(driver.find_element_by_class_name("navpage-main-left").find_element_by_xpath(".//iframe"))
 
     saveMenu = driver.find_element_by_xpath("//nav/div")
-    # print(' Save menu is here: ' + str(saveMenu))
     actions.move_to_element(saveMenu)
     actions.context_click(saveMenu)
     actions.perform()
     actions.reset_actions()
 
     saveButton = driver.find_element_by_xpath("//div[@id='context_1']/div[2]")
-    # print(' Save button is here: ' + str(saveButton))
 
     if saveTicket:
         saveButton.click()
@@ -43,6 +107,7 @@ def submitTicket():
     else:
         print("Ticket not saved! Make sure to set the saveTicket variable to True if you want to actually submit changes to the ticket.")
 
+# === CSV HELPER FUNCTIONS === #
 
 def importCSV(inputCSV):
     with open(inputCSV) as csv_file:
@@ -69,38 +134,11 @@ def appendToCSV(rowArray, csvFile):
         writer.writerow(rowArray)
     writeFile.close()
 
+# === OTHER HELPER FUNCTIONS === #
 
 def clearCSV(csvFile):
     writeFile = open(csvFile, "w+")
     writeFile.close()
-
-
-# Valid tasks are Restock, Repair or Decommission
-def setTaskType(task):
-    print("Setting ticket task as " + task)
-    driver.find_elements_by_xpath("//div[@class='sc_variable_editor']")[1].find_element_by_class_name(
-        "input_controls").find_element_by_xpath("//option[. = '" + task + "']").click()
-
-
-# Valid status are is 'Open' , 'Work in Progress' , 'Closed Complete' , 'Closed Incomplete' , and 'Pending'
-def setTicketState(status):
-    print("Setting ticket state to " + status)
-    driver.find_element_by_id('sc_task.state').find_element_by_xpath("//option[. = '" + status + "']").click()
-
-
-def getTicketState():
-    return str(selenium.webdriver.support.select.Select(driver.find_element_by_id('sc_task.state')).first_selected_option.text)
-
-
-def getTicketAssigned():
-    return str(driver.find_element_by_id('sys_display.sc_task.assigned_to').get_attribute("value"))
-
-
-def inputComment(commentString):
-    print("Typing " + str(commentString))
-    commentArea = driver.find_element_by_xpath("//textarea[@id='activity-stream-comments-textarea']")
-    # commentArea.click()
-    commentArea.send_keys(commentString)
 
 
 def search(inputString):
@@ -112,10 +150,6 @@ def search(inputString):
     searchbox.send_keys(Keys.RETURN)
 
 
-def getRITM():
-    return driver.find_element_by_id('sys_display.sc_task.request_item').get_attribute("value")
-
-
 def switchToMainFrame():
     driver.switch_to.frame(driver.find_element_by_class_name("navpage-main-left").find_element_by_xpath(".//iframe"))
 
@@ -123,6 +157,7 @@ def switchToMainFrame():
 def switchToDefaultFrame():
     driver.switch_to.default_content()
 
+# === MAIN TASK FUNCTIONS === #
 
 def restockItem(item):
 
@@ -147,7 +182,7 @@ def restockItem(item):
     time.sleep(timeToSleep)
 
     # Make sure the ticket is Open
-    if getTicketState() != 'Open':
+    if getTicketStateStr() != 'Open':
         raise Exception
 
     # Make sure the ticket is assigned to Bryan or John
@@ -161,7 +196,7 @@ def restockItem(item):
     # Enter comment
     # Sometimes the comment box area is collapsed by default, so we must click the button to expand it first
     try:
-        inputComment("Acknowledging asset/ticket")
+        setComment("Acknowledging asset/ticket")
         time.sleep(timeToSleep)
     except seleniumExceptions.ElementNotInteractableException:
         driver.find_element_by_xpath("//span[2]/span/nav/div/div[2]/span/button").click()
@@ -180,7 +215,7 @@ def restockItem(item):
     time.sleep(timeToSleep)
 
     # Enter comment
-    inputComment("Device to be restocked, SSO Imprivata Project G2-G4 Minis")
+    setComment("Device to be restocked, SSO Imprivata Project G2-G4 Minis")
     time.sleep(timeToSleep)
 
     # Set ticket task (Restock, Decommission, or Repair)
@@ -188,26 +223,13 @@ def restockItem(item):
     time.sleep(timeToSleep)
 
     # Save RITM for current item to CSV
-    appendToCSV(['', item, getRITM(), 'Restock'], 'output.csv')
-    print("RITM for " + item + " is " + getRITM())
+    appendToCSV(['', item, getTicketRITMStr(), 'Restock'], 'output.csv')
+    print("RITM for " + item + " is " + getTicketRITMStr())
 
     time.sleep(timeToSleep)
 
     # Save ticket
     submitTicket()
-
-# Returns a string, not the actual object
-def getRepairTypeStr():
-    return str(getRepairTypeObj().first_selected_option.text)
-
-def getRepairTypeObj():
-    return selenium.webdriver.support.select.Select(driver.find_element_by_xpath("//div[2]/table/tbody/tr/td/div/div/div/div[2]/select"))
-
-def setRepairType(str):
-    selenium.webdriver.support.select.Select(driver.find_element_by_xpath("//div[2]/table/tbody/tr/td/div/div/div/div[2]/select")).select_by_value(str)
-
-def setRepairLocation(str):
-    selenium.webdriver.support.select.Select(driver.find_element_by_xpath("//tr[3]/td/div/div/div/div[2]/select")).select_by_value(str)
 
 def waitForTaskSelection():
     try:
@@ -235,7 +257,7 @@ def repairItem(item):
     time.sleep(timeToSleep)
 
     # Make sure the ticket is Open
-    if getTicketState() != 'Open':
+    if getTicketStateStr() != 'Open':
         raise Exception
 
     # Make sure the ticket is assigned to Bryan or John
@@ -244,13 +266,13 @@ def repairItem(item):
 
     setTicketState('Work in Progress')
 
-    inputComment('Acknowledging asset/ticket')
+    setComment('Acknowledging asset/ticket')
 
     submitTicket()
 
     setTicketState('Closed Complete')
 
-    inputComment('Device to be repaired with SSD swapout; SSO Imprivata Project USDT Devices')
+    setComment('Device to be repaired with SSD swapout; SSO Imprivata Project USDT Devices')
 
     setTaskType('Repair')
 
@@ -258,7 +280,7 @@ def repairItem(item):
 
     submitTicket()
 
-    ritm = getRITM()
+    ritm = getTicketRITMStr()
 
     switchToDefaultFrame()
 
@@ -285,7 +307,7 @@ def repairItem(item):
     except:
         print("No task selected. Quitting due to timeout")
 
-    inputComment("Device to be repaired with SSD swapout; SSO Imprivata Project USDT Devices")
+    setComment("Device to be repaired with SSD swapout; SSO Imprivata Project USDT Devices")
 
     #print(driver.find_elements_by_xpath("//div[@class='sc_variable_editor']")[1].find_element_by_class_name("input_controls"))
     #print(driver.find_element_by_xpath(("//div[2]/table/tbody/tr/td/div/div/div/div[2]/select")))
@@ -298,8 +320,8 @@ def repairItem(item):
     setRepairType('onsite')
 
     # Save RITM for current item to CSV
-    appendToCSV(['', item, getRITM(), 'Repair'], 'output.csv')
-    print("RITM for " + item + " is " + getRITM())
+    appendToCSV(['', item, getTicketRITMStr(), 'Repair'], 'output.csv')
+    print("RITM for " + item + " is " + getTicketRITMStr())
 
     submitTicket()
 #
