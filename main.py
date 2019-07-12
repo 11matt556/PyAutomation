@@ -12,7 +12,7 @@ import csv
 
 # Start global variables
 driver = webdriver.Chrome()
-saveTicket = True
+saveTicket = False
 driver.implicitly_wait(3)
 timeToSleep = 0
 reviewRequired = []
@@ -39,7 +39,7 @@ def submitTicket():
 
     if saveTicket:
         saveButton.click()
-        print("Ticked saved.")
+        print("Ticket saved.")
     else:
         print("Ticket not saved! Make sure to set the saveTicket variable to True if you want to actually submit changes to the ticket.")
 
