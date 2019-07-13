@@ -94,15 +94,13 @@ def setVariableRepairLocation(str):
 # Enter commentString into the Additional Comments box
 def setComment(commentString):
     print("Typing " + str(commentString))
-    commentArea = None
+    commentArea = driver.find_element_by_xpath("//textarea[@id='activity-stream-comments-textarea']")
     # Sometimes the comment box area is collapsed by default, so we must click the button to expand it first
     try:
-        commentArea = driver.find_element_by_xpath("//textarea[@id='activity-stream-comments-textarea']")
+        commentArea.send_keys(commentString)
     except seleniumExceptions.ElementNotInteractableException:
         driver.find_element_by_xpath("//span[2]/span/nav/div/div[2]/span/button").click()
-
-    commentArea=driver.find_element_by_xpath("//textarea[@id='activity-stream-comments-textarea']")
-    commentArea.send_keys(commentString)
+        commentArea.send_keys(commentString)
 
 
 # Save changes to the ticket
@@ -391,7 +389,7 @@ for i in range(len(computers)):
         if verboseLog:
             traceback.print_tb(bad.__traceback__)
     finally:
-        if reviewRequired:
+        if reviewRequired and i+1 == len(computers):
             clearCSV('review.csv')
             print("THE FOLLOWING ITEMS REQUIRE MANUAL REVIEW! A copy has been saved to review.csv")
             for x in range(len(reviewRequired)):
