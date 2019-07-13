@@ -12,12 +12,13 @@ import csv
 
 # Start global variables
 driver = webdriver.Chrome()
-saveTicket = False
+saveTicket = True
 driver.implicitly_wait(3)
 timeToSleep = 0
 reviewRequired = []
 verboseLog = True
 taskType = None
+
 # End global variables
 
 # Start Functions
@@ -53,12 +54,19 @@ def getTicketRITMObj():
     return driver.find_element_by_id('sys_display.sc_task.request_item')
 
 
+def getTicketTaskNameObj():
+    return driver.find_element_by_id('sys_readonly.sc_task.u_task_name')
+
+
+def getTicketTaskNameStr():
+    return getTicketTaskNameObj().get_attribute("value")
+
 # === SETTERS === #
 
 
 # Select the type of task
 # Valid tasks are Restock, Repair or Decommission
-def setTaskType(task):
+def setVariableTaskType(task):
     print("Setting ticket task as " + task)
     driver.find_elements_by_xpath("//div[@class='sc_variable_editor']")[1].find_element_by_class_name(
         "input_controls").find_element_by_xpath("//option[. = '" + task + "']").click()
@@ -73,21 +81,27 @@ def setTicketState(status):
 
 # Set the repair type for this ticket
 # Valid repair types are 'onsite' and 'decommission'
-def setRepairType(str):
+def setVariableRepairType(str):
     selenium.webdriver.support.select.Select(driver.find_element_by_xpath("//div[2]/table/tbody/tr/td/div/div/div/div[2]/select")).select_by_value(str)
 
 
 # Set the repair location (IE, Can this item be repaired at ISC?)
 # Valid options are 'Yes' (This item can be repaired at ISC) or 'No' (This item must be repaired at MDC)
-def setRepairLocation(str):
+def setVariableRepairLocation(str):
     selenium.webdriver.support.select.Select(driver.find_element_by_xpath("//tr[3]/td/div/div/div/div[2]/select")).select_by_value(str)
 
 
 # Enter commentString into the Additional Comments box
 def setComment(commentString):
     print("Typing " + str(commentString))
-    commentArea = driver.find_element_by_xpath("//textarea[@id='activity-stream-comments-textarea']")
-    # commentArea.click()
+    commentArea = None
+    # Sometimes the comment box area is collapsed by default, so we must click the button to expand it first
+    try:
+        commentArea = driver.find_element_by_xpath("//textarea[@id='activity-stream-comments-textarea']")
+    except seleniumExceptions.ElementNotInteractableException:
+        driver.find_element_by_xpath("//span[2]/span/nav/div/div[2]/span/button").click()
+
+    commentArea=driver.find_element_by_xpath("//textarea[@id='activity-stream-comments-textarea']")
     commentArea.send_keys(commentString)
 
 
@@ -197,7 +211,6 @@ def restockItem(item):
 
     # Wait until a task is selected
     waitForTaskSelection()
-
     time.sleep(timeToSleep)
 
     # Make sure the ticket is Open
@@ -208,17 +221,17 @@ def restockItem(item):
     if getTicketAssigned() != ('Bryan Shain' or 'John Higman'):
         raise Exception
 
+    # Make sure this is a restock ticket
+    if getTicketTaskNameStr() != 'rhs_restock':
+        raise Exception
+
     # Set ticket state
     setTicketState('Work in Progress')
     time.sleep(timeToSleep)
 
     # Enter comment
-    # Sometimes the comment box area is collapsed by default, so we must click the button to expand it first
-    try:
-        setComment("Acknowledging asset/ticket")
-        time.sleep(timeToSleep)
-    except seleniumExceptions.ElementNotInteractableException:
-        driver.find_element_by_xpath("//span[2]/span/nav/div/div[2]/span/button").click()
+    setComment("Acknowledging asset/ticket")
+    time.sleep(timeToSleep)
 
     # Save ticket
     submitTicket()
@@ -238,11 +251,11 @@ def restockItem(item):
     time.sleep(timeToSleep)
 
     # Set ticket task (Restock, Decommission, or Repair)
-    setTaskType('Restock')
+    setVariableTaskType('Restock')
     time.sleep(timeToSleep)
 
     # Save RITM for current item to CSV
-    appendToCSV(['', item, getTicketRITMStr(), 'Restock'], 'output.csv')
+    appendToCSV(['', '', item, getTicketRITMStr(), 'Restock'], 'output.csv')
     print("RITM for " + item + " is " + getTicketRITMStr())
 
     time.sleep(timeToSleep)
@@ -285,9 +298,9 @@ def repairItem(item):
 
     setComment('Device to be repaired with SSD swapout; SSO Imprivata Project USDT Devices')
 
-    setTaskType('Repair')
+    setVariableTaskType('Repair')
 
-    setRepairLocation('Yes')
+    setVariableRepairLocation('Yes')
 
     submitTicket()
 
@@ -306,6 +319,9 @@ def repairItem(item):
     # Wait until a task is selected
     waitForTaskSelection()
 
+    if getTicketTaskNameStr() != 'rhs_repair':
+        raise Exception
+
     setComment("Device to be repaired with SSD swapout; SSO Imprivata Project USDT Devices")
 
     #print(driver.find_elements_by_xpath("//div[@class='sc_variable_editor']")[1].find_element_by_class_name("input_controls"))
@@ -316,10 +332,10 @@ def repairItem(item):
     # print(getRepairTypeStr())
 
     # onsite corresponds to "Repair Completed" as opposed to a decom repair
-    setRepairType('onsite')
+    setVariableRepairType('onsite')
 
     # Save RITM for current item to CSV
-    appendToCSV(['', item, getTicketRITMStr(), 'Repair'], 'output.csv')
+    appendToCSV(['', '', item, getTicketRITMStr(), 'Repair'], 'output.csv')
     print("RITM for " + item + " is " + getTicketRITMStr())
 
     submitTicket()
@@ -333,13 +349,14 @@ def repairItem(item):
 clearCSV('output.csv')
 
 # Set up CSV as Tim's script expects it
-appendToCSV(['SN','PC Name','RITM','Restock/Repair','Label Notes'],'output.csv')
+appendToCSV(['Tech Name','SN','PC Name','RITM','Restock/Repair','Label Notes'],'output.csv')
 
 # Import list of computer hostnames from csv
 computers = importCSV('input.csv')
 
 # Prompt user for type of ticket
 taskType = input("\nWhat should I do with these items?\n1 = Restock, 2 = Repair (ISC), 3 = Repair (MDC), 4 = Decommission\n")
+
 
 # Iterate through each item and do the things
 for i in range(len(computers)):
@@ -353,18 +370,19 @@ for i in range(len(computers)):
     try:
         if taskType == '1':
             restockItem(computers[i])
-        if taskType == '2':
+        elif taskType == '2':
             repairItem(computers[i])
-        if taskType == '3':
+        elif taskType == '3':
             print("MDC Repair not yet implemented")
             driver.close()
             exit()
-        if taskType == '4':
+        elif taskType == '4':
             print("Decommission Not yet implemented")
             driver.close()
             exit()
         else:
-            print("Invalid selection")
+            print("Invalid option")
+            driver.close()
             exit()
     except Exception as bad:
         print("Error in item: " + computers[i])
