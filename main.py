@@ -194,6 +194,19 @@ def waitForTaskSelection():
         print("No task selected. Quitting due to timeout")
 
 
+def autoSelectTask():
+    driver.get("https://ghsprod.service-now.com/nav_to.do?uri=%2Fsc_task_list.do%3Fsysparm_query%3D123TEXTQUERY321%253Ddt2UA5021NK4")
+    switchToMainFrame()
+    table_id = driver.find_element_by_id("sc_task_table")
+    table_head = table_id.find_element_by_tag_name("thead")
+    table_body = table_id.find_element_by_tag_name("tbody")
+    rows = table_body.find_elements_by_tag_name("tr")
+
+    for row in rows:
+        # Get the columns (all the column 2)
+        col = row.find_elements(By.TAG_NAME, "td")[4]  # note: index start from 0, 1 is col 2
+        print(col.text)  # prints text from the element
+
 # === MAIN TASK FUNCTIONS === #
 
 def restockItem(item):
@@ -378,6 +391,8 @@ for i in range(len(computers)):
             print("Decommission Not yet implemented")
             driver.close()
             exit()
+        elif taskType == '5':
+            autoSelectTask()
         else:
             print("Invalid option")
             driver.close()
