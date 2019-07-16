@@ -202,11 +202,17 @@ def autoSelectTask():
     table_body = table_id.find_element_by_tag_name("tbody")
     rows = table_body.find_elements_by_tag_name("tr")
 
+    row_2 = table_body.find_elements_by_tag_name("tr")[1]
+
     for row in rows:
         # Get the columns (all the column 2)
         col = row.find_elements(By.TAG_NAME, "td")[4]  # note: index start from 0, 1 is col 2
         print(col.text)  # prints text from the element
 
+    item = row_2.find_elements_by_tag_name("td")[5]
+    item2 = rows[1].find_elements_by_tag_name("td")[5]
+    print("cell 1,5 is: " + item.text)
+    print("cell 1,5 is: " + item2.text)
 # === MAIN TASK FUNCTIONS === #
 
 def restockItem(item):
