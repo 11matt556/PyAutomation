@@ -194,25 +194,46 @@ def waitForTaskSelection():
         print("No task selected. Quitting due to timeout")
 
 
-def autoSelectTask():
-    driver.get("https://ghsprod.service-now.com/nav_to.do?uri=%2Fsc_task_list.do%3Fsysparm_query%3D123TEXTQUERY321%253Ddt2UA5021NK4")
-    switchToMainFrame()
-    table_id = driver.find_element_by_id("sc_task_table")
-    table_head = table_id.find_element_by_tag_name("thead")
-    table_body = table_id.find_element_by_tag_name("tbody")
+def getRowSize(table_id):
+    table = driver.find_element_by_id(table_id)
+    table_head = table.find_element_by_tag_name("thead")
+    table_body = table.find_element_by_tag_name("tbody")
     rows = table_body.find_elements_by_tag_name("tr")
+    col = col = rows[0].find_elements_by_tag_name("td")
 
-    row_2 = table_body.find_elements_by_tag_name("tr")[1]
+    rowSize = len(rows)
+    return rowSize
 
-    for row in rows:
+
+def getColSize(table_id):
+    table = driver.find_element_by_id(table_id)
+    table_head = table.find_element_by_tag_name("thead")
+    table_body = table.find_element_by_tag_name("tbody")
+    rows = table_body.find_elements_by_tag_name("tr")
+    col = col = rows[0].find_elements_by_tag_name("td")
+
+    # Tables include an extra "spacer" td that increases the size by 1
+    colSize = len(col) - 1  # Dumb temporary solution to this problem
+
+    return colSize
+
+
+def findTableCell(table_id, rowIndex, colIndex):
+
+    table = driver.find_element_by_id(table_id)
+    table_head = table.find_element_by_tag_name("thead")
+    table_body = table.find_element_by_tag_name("tbody")
+
+    rows = table_body.find_elements_by_tag_name("tr")
+    col = rows[rowIndex].find_elements_by_tag_name("td")
+    cell = col[colIndex]
+
+    return cell
+#    for row in rows:
         # Get the columns (all the column 2)
-        col = row.find_elements(By.TAG_NAME, "td")[4]  # note: index start from 0, 1 is col 2
-        print(col.text)  # prints text from the element
+ #       col = row.find_elements(By.TAG_NAME, "td")[4]  # note: index start from 0, 1 is col 2
+  #      print(col.text)  # prints text from the element
 
-    item = row_2.find_elements_by_tag_name("td")[5]
-    item2 = rows[1].find_elements_by_tag_name("td")[5]
-    print("cell 1,5 is: " + item.text)
-    print("cell 1,5 is: " + item2.text)
 # === MAIN TASK FUNCTIONS === #
 
 def restockItem(item):
@@ -398,7 +419,11 @@ for i in range(len(computers)):
             driver.close()
             exit()
         elif taskType == '5':
-            autoSelectTask()
+            driver.get("https://ghsprod.service-now.com/nav_to.do?uri=%2Fsc_task_list.do%3Fsysparm_query%3D123TEXTQUERY321%253Ddt2UA5021NK4")
+            switchToMainFrame()
+            print(findTableCell("sc_task_table", 1, 5).text)
+            print("rows:" + str(getRowSize("sc_task_table")))
+            print("cols:" + str(getColSize("sc_task_table")))
         else:
             print("Invalid option")
             driver.close()
