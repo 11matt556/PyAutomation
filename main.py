@@ -210,7 +210,7 @@ def getColSize(table_id):
     table_head = table.find_element_by_tag_name("thead")
     table_body = table.find_element_by_tag_name("tbody")
     rows = table_body.find_elements_by_tag_name("tr")
-    col = col = rows[0].find_elements_by_tag_name("td")
+    col = rows[0].find_elements_by_tag_name("td")
 
     # Tables include an extra "spacer" td that increases the size by 1
     colSize = len(col)
@@ -242,14 +242,29 @@ def tableToArray(table_id):
 
     elements = []
     rows = table_body.find_elements_by_tag_name("tr")
+    head_rows = table_head.find_elements_by_tag_name("tr")
+    head_cols = head_rows[0].find_elements_by_tag_name("th")
 
     rowLen = getRowSize(table_id)
-    colLen = getColSize(table_id)
+    colLen = getColSize(table_id) - 1
+
+    print(str(colLen))
+
+    elements.append([])
+    for c in range(colLen):
+        print(str(0) + "," + str(c))
+        col = head_rows[0].find_elements_by_tag_name("th")
+        cell = col[c]
+        elements[0].append(cell.text)
+        print(cell.text + " " + str(0) + "," + str(c))
 
     for r in range(rowLen):
         elements.append([])
-        for y in range(colLen):
-            elements[r].append(findTableCell(table_id,r,y).text)
+        for c in range(colLen):
+            col = rows[r].find_elements_by_tag_name("td")
+            cell = col[c]
+            elements[r+1].append(cell.text)
+            print(cell.text)
 
     return elements
 
