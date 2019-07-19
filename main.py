@@ -297,14 +297,14 @@ def restockItem(item):
     groupCol = None
     RITMCol = None
     for c in range(len(table[0])):
-        item = str(table[0][c].text)
-        if item.startswith("State"):
+        tableItem = str(table[0][c].text)
+        if tableItem.startswith("State"):
             stateCol = c
-        elif item.startswith("Assigned To"):
+        elif tableItem.startswith("Assigned To"):
             assignedCol = c
-        elif item.startswith("Assignment Group"):
+        elif tableItem.startswith("Assignment Group"):
             groupCol = c
-        elif item.startswith("Request item"):
+        elif tableItem.startswith("Request item"):
             RITMCol = c
 
     # Find row with open state
@@ -329,14 +329,14 @@ def restockItem(item):
     groupCol = None
     TaskCol = None
     for c in range(len(table[0])):
-        item = str(table[0][c].text)
-        if item.startswith("State"):
+        tableItem = str(table[0][c].text)
+        if tableItem.startswith("State"):
             stateCol = c
-        elif item.startswith("Assigned To"):
+        elif tableItem.startswith("Assigned To"):
             assignedCol = c
-        elif item.startswith("Assignment Group"):
+        elif tableItem.startswith("Assignment Group"):
             groupCol = c
-        elif item.startswith("Number"):
+        elif tableItem.startswith("Number"):
             TaskCol = c
 
     # Find row with open state
