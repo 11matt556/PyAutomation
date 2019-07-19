@@ -12,7 +12,7 @@ import csv
 
 # Start global variables
 driver = webdriver.Chrome()
-saveTicket = False
+saveTicket = True
 driver.implicitly_wait(3)
 timeToSleep = 0
 reviewRequired = []
@@ -60,6 +60,15 @@ def getTicketTaskNameObj():
 
 def getTicketTaskNameStr():
     return getTicketTaskNameObj().get_attribute("value")
+
+
+def getTicketConfigurationItemObj():
+    return driver.find_element_by_id('sys_display.sc_req_item.cmdb_ci')
+
+
+def getTicketConfigurationItemStr():
+    return getTicketConfigurationItemObj().get_attribute("value")
+
 
 # === SETTERS === #
 
@@ -396,8 +405,8 @@ def restockItem(item):
     time.sleep(timeToSleep)
 
     # Save RITM for current item to CSV
-    appendToCSV(['', '', getTicketTaskNameStr(), getTicketRITMStr(), 'Restock'], 'output.csv')
-    print("RITM for " + getTicketTaskNameStr() + " is " + getTicketRITMStr())
+    appendToCSV(['', '', getTicketConfigurationItemStr(), getTicketRITMStr(), 'Restock'], 'output.csv')
+    print("RITM for " + str(getTicketConfigurationItemStr) + " is " + getTicketRITMStr())
 
     time.sleep(timeToSleep)
 
@@ -476,8 +485,8 @@ def repairItem(item):
     setVariableRepairType('onsite')
 
     # Save RITM for current item to CSV
-    appendToCSV(['', '', item, getTicketRITMStr(), 'Repair'], 'output.csv')
-    print("RITM for " + item + " is " + getTicketRITMStr())
+    appendToCSV(['', '', getTicketConfigurationItemStr(), getTicketRITMStr(), 'Restock'], 'output.csv')
+    print("RITM for " + getTicketConfigurationItemStr() + " is " + getTicketRITMStr())
 
     submitTicket()
 #
