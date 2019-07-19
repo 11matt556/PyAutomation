@@ -12,7 +12,7 @@ import csv
 
 # Start global variables
 driver = webdriver.Chrome()
-saveTicket = True
+saveTicket = False
 driver.implicitly_wait(3)
 timeToSleep = 0
 reviewRequired = []
@@ -245,30 +245,31 @@ def tableToArray(table_id):
     head_rows = table_head.find_elements_by_tag_name("tr")
     head_cols = head_rows[0].find_elements_by_tag_name("th")
 
-    rowLen = getRowSize(table_id)
-    colLen = getColSize(table_id) - 1
+    rowLen = len(rows)
+    colLen = len(rows[0].find_elements_by_tag_name('td')) - 1
 
-    print(str(colLen))
+    #print(str(colLen))
 
     elements.append([])
     for c in range(colLen):
-        print(str(0) + "," + str(c))
+        #print(str(0) + "," + str(c))
         col = head_rows[0].find_elements_by_tag_name("th")
         cell = col[c]
-        elements[0].append(cell.text)
-        print(cell.text + " " + str(0) + "," + str(c))
+        elements[0].append(cell)
+        #print(cell.text + " " + str(0) + "," + str(c))
 
     for r in range(rowLen):
         elements.append([])
         for c in range(colLen):
             col = rows[r].find_elements_by_tag_name("td")
             cell = col[c]
-            elements[r+1].append(cell.text)
-            print(cell.text)
+            elements[r+1].append(cell)
+            #print(cell.text)
 
     return elements
 
 # === MAIN TASK FUNCTIONS === #
+
 
 def restockItem(item):
 
@@ -282,16 +283,84 @@ def restockItem(item):
     switchToMainFrame()
 
     # Wait until a task is selected
-    waitForTaskSelection()
-    time.sleep(timeToSleep)
+    #waitForTaskSelection()
+    #time.sleep(timeToSleep)
+
+    # Select Task Automatically
+    # 1. Go to the catalog tasks page
+    driver.find_element_by_xpath("//div[7]/div/div/table/tbody/tr/td[2]/span/strong/a").click()
+
+    # Figure out which column indices we care about
+    table = tableToArray("sc_task_table")
+    stateCol = None
+    assignedCol = None
+    groupCol = None
+    RITMCol = None
+    for c in range(len(table[0])):
+        item = str(table[0][c].text)
+        if item.startswith("State"):
+            stateCol = c
+        elif item.startswith("Assigned To"):
+            assignedCol = c
+        elif item.startswith("Assignment Group"):
+            groupCol = c
+        elif item.startswith("Request item"):
+            RITMCol = c
+
+    # Find row with open state
+    for r in range(len(table)):
+        state = str(table[r][stateCol].text)
+        assigned = str(table[r][assignedCol].text)
+        group = str(table[r][groupCol].text)
+        ritm = (table[r][RITMCol])
+        print(state + " " + assigned + " " + group)
+
+        # Check that row with the open state meets our other criteria
+        if state == "Open" and assigned == "Bryan Shain" and group != "Device Configuration (Epic)":
+            print("Found RITM!")
+            print(ritm.text)
+            ritm.click()
+            break
+
+    # Find the ritm catalog tasks
+    table = tableToArray("sc_req_item.sc_task.request_item_table")
+    stateCol = None
+    assignedCol = None
+    groupCol = None
+    TaskCol = None
+    for c in range(len(table[0])):
+        item = str(table[0][c].text)
+        if item.startswith("State"):
+            stateCol = c
+        elif item.startswith("Assigned To"):
+            assignedCol = c
+        elif item.startswith("Assignment Group"):
+            groupCol = c
+        elif item.startswith("Number"):
+            TaskCol = c
+
+    # Find row with open state
+    for r in range(len(table)):
+        state = str(table[r][stateCol].text)
+        assigned = str(table[r][assignedCol].text)
+        group = str(table[r][groupCol].text)
+        task = (table[r][TaskCol])
+        print(state + " " + assigned + " " + group)
+
+        # Check that row with the open statemeets other criteria
+        if state == "Open" and assigned == "Bryan Shain" and group != "Device Configuration (Epic)":
+            print("Found TASK!")
+            print(task.text)
+            task.click()
+            break
 
     # Make sure the ticket is Open
     if getTicketStateStr() != 'Open':
         raise Exception
 
     # Make sure the ticket is assigned to Bryan or John
-#    if getTicketAssigned() != ('Bryan Shain' or 'John Higman'):
-#        raise Exception
+    if getTicketAssigned() != 'Bryan Shain' and getTicketAssigned() != 'John Higman':
+        raise Exception
 
     # Make sure this is a restock ticket
     if getTicketTaskNameStr() != 'rhs_restock':
@@ -327,8 +396,8 @@ def restockItem(item):
     time.sleep(timeToSleep)
 
     # Save RITM for current item to CSV
-    appendToCSV(['', '', item, getTicketRITMStr(), 'Restock'], 'output.csv')
-    print("RITM for " + item + " is " + getTicketRITMStr())
+    appendToCSV(['', '', getTicketTaskNameStr(), getTicketRITMStr(), 'Restock'], 'output.csv')
+    print("RITM for " + getTicketTaskNameStr() + " is " + getTicketRITMStr())
 
     time.sleep(timeToSleep)
 
@@ -453,13 +522,24 @@ for i in range(len(computers)):
             driver.close()
             exit()
         elif taskType == '5':
-            driver.get("https://ghsprod.service-now.com/nav_to.do?uri=%2Fsc_task_list.do%3Fsysparm_query%3D123TEXTQUERY321%253Ddt2UA5021NK4")
+            driver.get("https://ghsprod.service-now.com/nav_to.do?uri=%2Fsc_task_list.do%3Fsysparm_query%3D123TEXTQUERY321%253DDT8CG7311FBZ")
             switchToMainFrame()
             array = tableToArray("sc_task_table")
             print(array)
-            #print(findTableCell("sc_task_table", 1, 5).text)
-            #print("rows:" + str(getRowSize("sc_task_table")))
-            #print("cols:" + str(getColSize("sc_task_table")))
+            print(array[6][4].text)
+
+
+            #driver.get("https://ghsprod.service-now.com/nav_to.do?uri=%2Fsc_task_list.do%3Fsysparm_query%3D123TEXTQUERY321%253Ddt2UA5021NK4")
+            #switchToMainFrame()
+            #array = tableToArray("sc_task_table")
+            #print(array)
+            #print(array[1][5])
+
+            #driver.get("https://ghsprod.service-now.com/nav_to.do?uri=%2Fsc_req_item.do%3Fsys_id%3D29c74459dba6bb8cb7fe378239961952")
+            #switchToMainFrame()
+            #array = tableToArray("sc_req_item.sc_task.request_item_table")
+            #print(array)
+            #print(array[1][2])
         else:
             print("Invalid option")
             driver.close()
