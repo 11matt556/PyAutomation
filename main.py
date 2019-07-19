@@ -213,7 +213,7 @@ def getColSize(table_id):
     col = col = rows[0].find_elements_by_tag_name("td")
 
     # Tables include an extra "spacer" td that increases the size by 1
-    colSize = len(col) - 1  # Dumb temporary solution to this problem
+    colSize = len(col)
 
     return colSize
 
@@ -233,6 +233,25 @@ def findTableCell(table_id, rowIndex, colIndex):
         # Get the columns (all the column 2)
  #       col = row.find_elements(By.TAG_NAME, "td")[4]  # note: index start from 0, 1 is col 2
   #      print(col.text)  # prints text from the element
+
+
+def tableToArray(table_id):
+    table = driver.find_element_by_id(table_id)
+    table_head = table.find_element_by_tag_name("thead")
+    table_body = table.find_element_by_tag_name("tbody")
+
+    elements = []
+    rows = table_body.find_elements_by_tag_name("tr")
+
+    rowLen = getRowSize(table_id)
+    colLen = getColSize(table_id)
+
+    for r in range(rowLen):
+        elements.append([])
+        for y in range(colLen):
+            elements[r].append(findTableCell(table_id,r,y).text)
+
+    return elements
 
 # === MAIN TASK FUNCTIONS === #
 
@@ -256,8 +275,8 @@ def restockItem(item):
         raise Exception
 
     # Make sure the ticket is assigned to Bryan or John
-    if getTicketAssigned() != ('Bryan Shain' or 'John Higman'):
-        raise Exception
+#    if getTicketAssigned() != ('Bryan Shain' or 'John Higman'):
+#        raise Exception
 
     # Make sure this is a restock ticket
     if getTicketTaskNameStr() != 'rhs_restock':
@@ -421,9 +440,11 @@ for i in range(len(computers)):
         elif taskType == '5':
             driver.get("https://ghsprod.service-now.com/nav_to.do?uri=%2Fsc_task_list.do%3Fsysparm_query%3D123TEXTQUERY321%253Ddt2UA5021NK4")
             switchToMainFrame()
-            print(findTableCell("sc_task_table", 1, 5).text)
-            print("rows:" + str(getRowSize("sc_task_table")))
-            print("cols:" + str(getColSize("sc_task_table")))
+            array = tableToArray("sc_task_table")
+            print(array)
+            #print(findTableCell("sc_task_table", 1, 5).text)
+            #print("rows:" + str(getRowSize("sc_task_table")))
+            #print("cols:" + str(getColSize("sc_task_table")))
         else:
             print("Invalid option")
             driver.close()
