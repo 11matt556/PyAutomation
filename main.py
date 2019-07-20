@@ -277,6 +277,28 @@ def tableToArray(table_id):
 
     return elements
 
+
+def findColIndices(table,colNames):
+    #table = tableToArray("sc_task_table")
+    #stateCol = None
+    #assignedCol = None
+    #groupCol = None
+    #RITMCol = None
+
+    colDict = {}
+
+    for c in range(len(table[0])):
+        tableItem = str(table[0][c].text)
+
+        for n in range(len(colNames)):
+            if tableItem.startswith(colNames[n]):
+                colDict[colNames[n]] = c
+
+    return colDict
+
+
+
+
 # === MAIN TASK FUNCTIONS === #
 
 
@@ -296,68 +318,48 @@ def restockItem(item):
     #time.sleep(timeToSleep)
 
     # Select Task Automatically
-    # 1. Go to the catalog tasks page
+    #  Click on the catalog tasks page
     driver.find_element_by_xpath("//div[7]/div/div/table/tbody/tr/td[2]/span/strong/a").click()
 
-    # Figure out which column indices we care about
+    # Load the table into an 'array' for easier searching and indexing
     table = tableToArray("sc_task_table")
-    stateCol = None
-    assignedCol = None
-    groupCol = None
-    RITMCol = None
-    for c in range(len(table[0])):
-        tableItem = str(table[0][c].text)
-        if tableItem.startswith("State"):
-            stateCol = c
-        elif tableItem.startswith("Assigned To"):
-            assignedCol = c
-        elif tableItem.startswith("Assignment Group"):
-            groupCol = c
-        elif tableItem.startswith("Request item"):
-            RITMCol = c
 
-    # Find row with open state
+    # Figure out which column indices we care about
+    columnIndices = findColIndices(table,["State","Assigned To","Assignment Group","Request item"])
+
+    # For each row, check the value in each of the columns we care about
+    # until we find a row that matches all criteria
     for r in range(len(table)):
-        state = str(table[r][stateCol].text)
-        assigned = str(table[r][assignedCol].text)
-        group = str(table[r][groupCol].text)
-        ritm = (table[r][RITMCol])
+        state = table[r][columnIndices["State"]]
+        assigned = table[r][columnIndices["Assigned To"]]
+        group = table[r][columnIndices["Assignment Group"]]
+        ritm = table[r][columnIndices["Request item"]]
         print(state + " " + assigned + " " + group)
 
         # Check that row with the open state meets our other criteria
-        if state == "Open" and assigned == "Bryan Shain" and group != "Device Configuration (Epic)":
+        if state.text == "Open" and assigned.text == "Bryan Shain" and group.text != "Device Configuration (Epic)":
             print("Found RITM!")
             print(ritm.text)
             ritm.click()
             break
 
     # Find the ritm catalog tasks
+    # Load the table into an 'array' for easier searching and indexing
     table = tableToArray("sc_req_item.sc_task.request_item_table")
-    stateCol = None
-    assignedCol = None
-    groupCol = None
-    TaskCol = None
-    for c in range(len(table[0])):
-        tableItem = str(table[0][c].text)
-        if tableItem.startswith("State"):
-            stateCol = c
-        elif tableItem.startswith("Assigned To"):
-            assignedCol = c
-        elif tableItem.startswith("Assignment Group"):
-            groupCol = c
-        elif tableItem.startswith("Number"):
-            TaskCol = c
+
+    # Figure out which column indices we care about
+    columnIndices = findColIndices(table,["State","Assigned To","Assignment Group","Request item"])
 
     # Find row with open state
     for r in range(len(table)):
-        state = str(table[r][stateCol].text)
-        assigned = str(table[r][assignedCol].text)
-        group = str(table[r][groupCol].text)
-        task = (table[r][TaskCol])
+        state = table[r][columnIndices["State"]]
+        assigned = table[r][columnIndices["Assigned To"]]
+        group = table[r][columnIndices["Assignment Group"]]
+        task = table[r][columnIndices["Request item"]]
         print(state + " " + assigned + " " + group)
 
         # Check that row with the open statemeets other criteria
-        if state == "Open" and assigned == "Bryan Shain" and group != "Device Configuration (Epic)":
+        if state.text == "Open" and assigned.text == "Bryan Shain" and group.text != "Device Configuration (Epic)":
             print("Found TASK!")
             print(task.text)
             task.click()
