@@ -297,73 +297,45 @@ def findColIndices(table,colNames):
     return colDict
 
 
+# List should be in the format of [['key', 'value', bool],[...]]
+def clickTableItem(table_id, listOfStuff, clickThis):
+    table = tableToArray(table_id)
+    columnNames = []
+    for item in listOfStuff:
+        columnNames.append(item[0])
+    columnIndices = findColIndices(table, columnNames+[clickThis])
+
+    for row in table:
+        for key, value, equal in listOfStuff:
+            if equal:
+                if row[columnIndices[key]].text == value:
+                    continue
+                else:
+                    break
+            else:
+                if row[columnIndices[key]].text != value:
+                    continue
+                else:
+                    break
+        else:
+            row[columnIndices[clickThis]].click()
+            break
 
 
 # === MAIN TASK FUNCTIONS === #
-
 
 def restockItem(item):
 
     # Make sure we have the default/top iframe selected
     driver.switch_to.default_content()
-
-    # Search for the 1st computer
     search(item)
-
-    # Switch to main content iframe
     switchToMainFrame()
-
-    # Wait until a task is selected
-    #waitForTaskSelection()
-    #time.sleep(timeToSleep)
-
-    # Select Task Automatically
     #  Click on the catalog tasks page
     driver.find_element_by_xpath("//div[7]/div/div/table/tbody/tr/td[2]/span/strong/a").click()
 
-    # Load the table into an 'array' for easier searching and indexing
-    table = tableToArray("sc_task_table")
-
-    # Figure out which column indices we care about
-    columnIndices = findColIndices(table,["State","Assigned To","Assignment Group","Request item"])
-
-    # For each row, check the value in each of the columns we care about
-    # until we find a row that matches all criteria
-    for r in range(len(table)):
-        state = table[r][columnIndices["State"]]
-        assigned = table[r][columnIndices["Assigned To"]]
-        group = table[r][columnIndices["Assignment Group"]]
-        ritm = table[r][columnIndices["Request item"]]
-        print(state + " " + assigned + " " + group)
-
-        # Check that row with the open state meets our other criteria
-        if state.text == "Open" and assigned.text == "Bryan Shain" and group.text != "Device Configuration (Epic)":
-            print("Found RITM!")
-            print(ritm.text)
-            ritm.click()
-            break
-
-    # Find the ritm catalog tasks
-    # Load the table into an 'array' for easier searching and indexing
-    table = tableToArray("sc_req_item.sc_task.request_item_table")
-
-    # Figure out which column indices we care about
-    columnIndices = findColIndices(table,["State","Assigned To","Assignment Group","Number"])
-
-    # Find row with open state
-    for r in range(len(table)):
-        state = table[r][columnIndices["State"]]
-        assigned = table[r][columnIndices["Assigned To"]]
-        group = table[r][columnIndices["Assignment Group"]]
-        task = table[r][columnIndices["Request item"]]
-        print(state + " " + assigned + " " + group)
-
-        # Check that row with the open statemeets other criteria
-        if state.text == "Open" and assigned.text == "Bryan Shain" and group.text != "Device Configuration (Epic)":
-            print("Found TASK!")
-            print(task.text)
-            task.click()
-            break
+    conditions = [["State", "Open", True], ["Assignment Group", "Device Configuration (Epic)", False]]
+    clickTableItem("sc_task_table", conditions, "Request item")  # Select RITM Automatically
+    clickTableItem("sc_req_item.sc_task.request_item_table", conditions, "Number")  # Select the Task automatically
 
     # Make sure the ticket is Open
     if getTicketStateStr() != 'Open':
@@ -377,60 +349,33 @@ def restockItem(item):
     if getTicketTaskNameStr() != 'rhs_restock':
         raise Exception
 
-    # Set ticket state
+    # Complete the first stage of the ticket
     setTicketState('Work in Progress')
-    time.sleep(timeToSleep)
-
-    # Enter comment
     setComment("Acknowledging asset/ticket")
-    time.sleep(timeToSleep)
-
-    # Save ticket
     submitTicket()
-    time.sleep(timeToSleep)
 
-    driver.switch_to.default_content()
+    switchToDefaultFrame()
+    switchToMainFrame()
 
-    # Switch to main content iframe
-    driver.switch_to.frame(driver.find_element_by_class_name("navpage-main-left").find_element_by_xpath(".//iframe"))
-
-    # Set ticket state
+    # Complete the second stage of the ticket
     setTicketState('Closed Complete')
-    time.sleep(timeToSleep)
-
-    # Enter comment
     setComment("Device to be restocked, SSO Imprivata Project G2-G4 Minis")
-    time.sleep(timeToSleep)
-
-    # Set ticket task (Restock, Decommission, or Repair)
-    setVariableTaskType('Restock')
-    time.sleep(timeToSleep)
+    setVariableTaskType('Restock') # Set ticket task (Restock, Decommission, or Repair)
 
     # Save RITM for current item to CSV
     appendToCSV(['', '', getTicketConfigurationItemStr(), getTicketRITMStr(), 'Restock'], 'output.csv')
     print("RITM for " + getTicketConfigurationItemStr() + " is " + getTicketRITMStr())
-
-    time.sleep(timeToSleep)
-
-    # Save ticket
     submitTicket()
 
 
 def repairItem(item):
-    #driver.get("https://ghsprod.service-now.com/nav_to.do?uri=%2Fsc_task.do%3Fsys_id%3D86f33381db6c93c8cf1fa961ca9619c1%26sysparm_view%3Dtext_search%26sysparm_record_target%3Dsc_task%26sysparm_record_row%3D1%26sysparm_record_rows%3D4362%26sysparm_record_list%3D123TEXTQUERY321%25253Drhs_repair")
 
-    # Make sure we have the default/top iframe selected
-    driver.switch_to.default_content()
-
-    # Search for the computer
+    switchToDefaultFrame()
     search(item)
-
-    # Switch to main content iframe
     switchToMainFrame()
 
     # Wait until a task is selected
     waitForTaskSelection()
-    time.sleep(timeToSleep)
 
     # Make sure the ticket is Open
     if getTicketStateStr() != 'Open':
@@ -441,19 +386,14 @@ def repairItem(item):
         raise Exception
 
     setTicketState('Work in Progress')
-
     setComment('Acknowledging asset/ticket')
 
     submitTicket()
 
     setTicketState('Closed Complete')
-
     setComment('Device to be repaired with SSD swapout; SSO Imprivata Project USDT Devices')
-
     setVariableTaskType('Repair')
-
     setVariableRepairLocation('Yes')
-
     submitTicket()
 
     ritm = getTicketRITMStr()
@@ -538,19 +478,6 @@ for i in range(len(computers)):
             array = tableToArray("sc_task_table")
             print(array)
             print(array[6][4].text)
-
-
-            #driver.get("https://ghsprod.service-now.com/nav_to.do?uri=%2Fsc_task_list.do%3Fsysparm_query%3D123TEXTQUERY321%253Ddt2UA5021NK4")
-            #switchToMainFrame()
-            #array = tableToArray("sc_task_table")
-            #print(array)
-            #print(array[1][5])
-
-            #driver.get("https://ghsprod.service-now.com/nav_to.do?uri=%2Fsc_req_item.do%3Fsys_id%3D29c74459dba6bb8cb7fe378239961952")
-            #switchToMainFrame()
-            #array = tableToArray("sc_req_item.sc_task.request_item_table")
-            #print(array)
-            #print(array[1][2])
         else:
             print("Invalid option")
             driver.close()
