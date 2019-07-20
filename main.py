@@ -325,37 +325,57 @@ def clickTableItem(table_id, listOfStuff, clickThis):
 
 def singleStage(type, action):
     if type == "rhs_restock":
+        # Make sure the ticket is Open
+        if getTicketStateStr() != 'Open':
+            raise Exception
+
+        # Make sure the ticket is assigned to Bryan or John
+        if getTicketAssigned() != 'Bryan Shain' and getTicketAssigned() != 'John Higman':
+            raise Exception
+
+        # Make sure this is a restock ticket
+        if getTicketTaskNameStr() != type:
+            raise Exception
+
+        # Mark ticket as work in progress
+        setTicketState('Work in Progress')
+        setComment("Acknowledging asset/ticket")
+        submitTicket()
+        switchToDefaultFrame()
+        switchToMainFrame()
+
         if action == "Restock":
-            # Make sure the ticket is Open
-            if getTicketStateStr() != 'Open':
-                raise Exception
-
-            # Make sure the ticket is assigned to Bryan or John
-            if getTicketAssigned() != 'Bryan Shain' and getTicketAssigned() != 'John Higman':
-                raise Exception
-
-            # Make sure this is a restock ticket
-            if getTicketTaskNameStr() != type:
-                raise Exception
-
-            # Mark ticket as work in progress
-            setTicketState('Work in Progress')
-            setComment("Acknowledging asset/ticket")
-            submitTicket()
-
-            switchToDefaultFrame()
-            switchToMainFrame()
-
             # Close Ticket
             setTicketState('Closed Complete')
             setComment("Device to be restocked, SSO Imprivata Project G2-G4 Minis")
             setVariableTaskType('Restock')  # Set ticket task (Restock, Decommission, or Repair)
+        if action == "Decom":
+            # Close Ticket
+            setTicketState('Closed Complete')
+            setComment("This device is being decomissioned, won't be used for SSO, or is out of commission; send to MDC ")
+            setVariableTaskType('Decommission')  # Set ticket task (Restock, Decommission, or Repair)
 
-            # Save RITM for current item to CSV
-            appendToCSV(['', '', getTicketConfigurationItemStr(), getTicketRITMStr(), 'Restock'], 'output.csv')
-            print("RITM for " + getTicketConfigurationItemStr() + " is " + getTicketRITMStr())
-            submitTicket()
+        # Save RITM for current item to CSV
+        appendToCSV(['', '', getTicketConfigurationItemStr(), getTicketRITMStr(), 'Restock'], 'output.csv')
+        print("RITM for " + getTicketConfigurationItemStr() + " is " + getTicketRITMStr())
+        submitTicket()
 
+def decomItem(item):
+    # Make sure we have the default/top iframe selected
+    driver.switch_to.default_content()
+    search(item)
+    switchToMainFrame()
+    #  Click on the catalog tasks page
+    driver.find_element_by_xpath("//div[7]/div/div/table/tbody/tr/td[2]/span/strong/a").click()
+
+    # Locate the ticket on the catalog page
+    conditions = [["State", "Open", True], ["Assignment Group", "Device Configuration (Epic)", False]]
+    clickTableItem("sc_task_table", conditions, "Request item")  # Select RITM Automatically
+    clickTableItem("sc_req_item.sc_task.request_item_table", conditions, "Number")  # Select the Task automatically
+
+    ###########################################
+
+    singleStage("rhs_restock", "Decom")
 
 def restockItem(item):
 
@@ -476,8 +496,9 @@ for i in range(len(computers)):
             driver.close()
             exit()
         elif taskType == '4':
-            print("Decommission Not yet implemented")
-            driver.close()
+            #print("Decommission Not yet implemented")
+            #driver.close()
+            decomItem(computers[i])
             exit()
         elif taskType == '5':
             driver.get("https://ghsprod.service-now.com/nav_to.do?uri=%2Fsc_task_list.do%3Fsysparm_query%3D123TEXTQUERY321%253DDT8CG7311FBZ")
