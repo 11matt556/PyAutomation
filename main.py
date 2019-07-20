@@ -348,7 +348,7 @@ def restockItem(item):
     table = tableToArray("sc_req_item.sc_task.request_item_table")
 
     # Figure out which column indices we care about
-    columnIndices = findColIndices(table,["State","Assigned To","Assignment Group","Request item"])
+    columnIndices = findColIndices(table,["State","Assigned To","Assignment Group","Number"])
 
     # Find row with open state
     for r in range(len(table)):
