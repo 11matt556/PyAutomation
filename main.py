@@ -202,47 +202,6 @@ def waitForTaskSelection():
         print("No task selected. Quitting due to timeout")
 
 
-def getRowSize(table_id):
-    table = driver.find_element_by_id(table_id)
-    table_head = table.find_element_by_tag_name("thead")
-    table_body = table.find_element_by_tag_name("tbody")
-    rows = table_body.find_elements_by_tag_name("tr")
-    col = col = rows[0].find_elements_by_tag_name("td")
-
-    rowSize = len(rows)
-    return rowSize
-
-
-def getColSize(table_id):
-    table = driver.find_element_by_id(table_id)
-    table_head = table.find_element_by_tag_name("thead")
-    table_body = table.find_element_by_tag_name("tbody")
-    rows = table_body.find_elements_by_tag_name("tr")
-    col = rows[0].find_elements_by_tag_name("td")
-
-    # Tables include an extra "spacer" td that increases the size by 1
-    colSize = len(col)
-
-    return colSize
-
-
-def findTableCell(table_id, rowIndex, colIndex):
-
-    table = driver.find_element_by_id(table_id)
-    table_head = table.find_element_by_tag_name("thead")
-    table_body = table.find_element_by_tag_name("tbody")
-
-    rows = table_body.find_elements_by_tag_name("tr")
-    col = rows[rowIndex].find_elements_by_tag_name("td")
-    cell = col[colIndex]
-
-    return cell
-#    for row in rows:
-        # Get the columns (all the column 2)
- #       col = row.find_elements(By.TAG_NAME, "td")[4]  # note: index start from 0, 1 is col 2
-  #      print(col.text)  # prints text from the element
-
-
 def tableToArray(table_id):
     table = driver.find_element_by_id(table_id)
     table_head = table.find_element_by_tag_name("thead")
@@ -278,12 +237,6 @@ def tableToArray(table_id):
 
 
 def findColIndices(table,colNames):
-    #table = tableToArray("sc_task_table")
-    #stateCol = None
-    #assignedCol = None
-    #groupCol = None
-    #RITMCol = None
-
     colDict = {}
 
     for c in range(len(table[0])):
