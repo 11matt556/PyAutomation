@@ -14,7 +14,6 @@ import csv
 driver = webdriver.Chrome()
 saveTicket = False
 driver.implicitly_wait(3)
-timeToSleep = 0
 reviewRequired = []
 verboseLog = True
 taskType = None
@@ -349,7 +348,7 @@ def restockItem(item):
     if getTicketTaskNameStr() != 'rhs_restock':
         raise Exception
 
-    # Complete the first stage of the ticket
+    # Mark ticket as work in progress
     setTicketState('Work in Progress')
     setComment("Acknowledging asset/ticket")
     submitTicket()
@@ -357,7 +356,7 @@ def restockItem(item):
     switchToDefaultFrame()
     switchToMainFrame()
 
-    # Complete the second stage of the ticket
+    # Close Ticket
     setTicketState('Closed Complete')
     setComment("Device to be restocked, SSO Imprivata Project G2-G4 Minis")
     setVariableTaskType('Restock') # Set ticket task (Restock, Decommission, or Repair)
@@ -370,58 +369,55 @@ def restockItem(item):
 
 def repairItem(item):
 
-    switchToDefaultFrame()
+    # Make sure we have the default/top iframe selected
+    driver.switch_to.default_content()
     search(item)
     switchToMainFrame()
+    #  Click on the catalog tasks page
+    driver.find_element_by_xpath("//div[7]/div/div/table/tbody/tr/td[2]/span/strong/a").click()
 
-    # Wait until a task is selected
-    waitForTaskSelection()
+    conditions = [["State", "Open", True], ["Assignment Group", "Device Configuration (Epic)", False]]
+    clickTableItem("sc_task_table", conditions, "Request item")  # Select RITM Automatically
+    clickTableItem("sc_req_item.sc_task.request_item_table", conditions, "Number")  # Select the Task automatically
 
     # Make sure the ticket is Open
     if getTicketStateStr() != 'Open':
         raise Exception
 
     # Make sure the ticket is assigned to Bryan or John
-    if getTicketAssigned() != ('Bryan Shain' or 'John Higman'):
+    if getTicketAssigned() != 'Bryan Shain' and getTicketAssigned() != 'John Higman':
         raise Exception
 
+    # Make sure this is a restock ticket
+    if getTicketTaskNameStr() != 'rhs_restock':
+        raise Exception
+
+    # Mark ticket as work in progress
     setTicketState('Work in Progress')
     setComment('Acknowledging asset/ticket')
-
     submitTicket()
 
+    # Close ticket
     setTicketState('Closed Complete')
     setComment('Device to be repaired with SSD swapout; SSO Imprivata Project USDT Devices')
     setVariableTaskType('Repair')
     setVariableRepairLocation('Yes')
     submitTicket()
 
-    ritm = getTicketRITMStr()
-
     switchToDefaultFrame()
-
-    search(ritm)
-
+    search(getTicketRITMStr)
     waitForAlert()
-
     switchToMainFrame()
 
-    driver.find_element(By.LINK_TEXT, "Click here").click()
+    #driver.find_element(By.LINK_TEXT, "Click here").click()
 
-    # Wait until a task is selected
-    waitForTaskSelection()
+    clickTableItem("sc_req_item.sc_task.request_item_table", conditions, "Number")  # Select the Task automatically
 
     if getTicketTaskNameStr() != 'rhs_repair':
         raise Exception
 
     setComment("Device to be repaired with SSD swapout; SSO Imprivata Project USDT Devices")
-
-    #print(driver.find_elements_by_xpath("//div[@class='sc_variable_editor']")[1].find_element_by_class_name("input_controls"))
-    #print(driver.find_element_by_xpath(("//div[2]/table/tbody/tr/td/div/div/div/div[2]/select")))
-
     setTicketState('Closed Complete')
-
-    # print(getRepairTypeStr())
 
     # onsite corresponds to "Repair Completed" as opposed to a decom repair
     setVariableRepairType('onsite')
