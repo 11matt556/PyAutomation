@@ -12,7 +12,7 @@ import csv
 
 # Start global variables
 driver = webdriver.Chrome()
-saveTicket = True
+saveTicket = False
 driver.implicitly_wait(3)
 timeToSleep = 0
 reviewRequired = []
@@ -63,7 +63,7 @@ def getTicketTaskNameStr():
 
 
 def getTicketConfigurationItemObj():
-    return driver.find_element_by_id('sys_display.sc_req_item.cmdb_ci')
+    return driver.find_element_by_xpath("//*[@id='sys_display.sc_task.cmdb_ci']")
 
 
 def getTicketConfigurationItemStr():
@@ -406,7 +406,7 @@ def restockItem(item):
 
     # Save RITM for current item to CSV
     appendToCSV(['', '', getTicketConfigurationItemStr(), getTicketRITMStr(), 'Restock'], 'output.csv')
-    print("RITM for " + str(getTicketConfigurationItemStr) + " is " + getTicketRITMStr())
+    print("RITM for " + getTicketConfigurationItemStr() + " is " + getTicketRITMStr())
 
     time.sleep(timeToSleep)
 
