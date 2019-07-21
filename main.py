@@ -74,10 +74,10 @@ def getTicketConfigurationItemStr():
 
 # Select the type of task
 # Valid tasks are Restock, Repair or Decommission
-def setVariableTaskType(task):
-    print("Setting ticket task as " + task)
+def setVariableActionType(action):
+    print("Setting ticket action as " + action)
     driver.find_elements_by_xpath("//div[@class='sc_variable_editor']")[1].find_element_by_class_name(
-        "input_controls").find_element_by_xpath("//option[. = '" + task + "']").click()
+        "input_controls").find_element_by_xpath("//option[. = '" + action + "']").click()
 
 
 # Set the status of the ticket
@@ -203,6 +203,7 @@ def waitForTaskSelection():
 
 
 def tableToArray(table_id):
+    print("Loading table")
     table = driver.find_element_by_id(table_id)
     table_head = table.find_element_by_tag_name("thead")
     table_body = table.find_element_by_tag_name("tbody")
@@ -251,14 +252,16 @@ def findColIndices(table,colNames):
 
 # List should be in the format of [['key', 'value', bool],[...]]
 def clickTableItem(table_id, listOfStuff, clickThis):
-    table = tableToArray(table_id)
+
     columnNames = []
     for item in listOfStuff:
         columnNames.append(item[0])
+    table = tableToArray(table_id)
     columnIndices = findColIndices(table, columnNames+[clickThis])
-
+    print("Looking through table...")
     for row in table:
         for key, value, equal in listOfStuff:
+            print(row[columnIndices[key]].text)
             if equal:
                 if row[columnIndices[key]].text == value:
                     continue
@@ -270,6 +273,7 @@ def clickTableItem(table_id, listOfStuff, clickThis):
                 else:
                     break
         else:
+            print("Found ticket!")
             row[columnIndices[clickThis]].click()
             break
 
@@ -277,8 +281,8 @@ def clickTableItem(table_id, listOfStuff, clickThis):
 # === MAIN TASK FUNCTIONS === #
 
 
-def singleStage(ticketType, action, item):
-    if ticketType == "rhs_restock":
+def singleStage(taskName, action, item):
+    if taskName == "rhs_restock":
         switchToDefaultFrame()
         search(item)
         switchToMainFrame()
@@ -295,7 +299,7 @@ def singleStage(ticketType, action, item):
             raise Exception
 
         # Make sure this is a restock ticket
-        if getTicketTaskNameStr() != ticketType:
+        if getTicketTaskNameStr() != taskName:
             raise Exception
 
         # Mark ticket as work in progress
@@ -309,23 +313,23 @@ def singleStage(ticketType, action, item):
             # Close Ticket
             setTicketState('Closed Complete')
             setComment("Device to be restocked, SSO Imprivata Project G2-G4 Minis")
-            setVariableTaskType('Restock')  # Set ticket task (Restock, Decommission, or Repair)
+            setVariableActionType('Restock')  # Set ticket task (Restock, Decommission, or Repair)
         if action == "Decom":
             # Close Ticket
             setTicketState('Closed Complete')
             setComment("This device is being decomissioned, won't be used for SSO, or is out of commission; send to MDC ")
-            setVariableTaskType('Decommission')  # Set ticket task (Restock, Decommission, or Repair)
+            setVariableActionType('Decommission')  # Set ticket task (Restock, Decommission, or Repair)
         if action == "Repair (MDC)":
             # Close ticket
             setTicketState('Closed Complete')
             setComment('Laptop processed for repair / SSD swap at MDC.')
-            setVariableTaskType('Repair')
+            setVariableActionType('Repair')
             setVariableRepairAtISC('No')
         if action == "Repair (ISC)":
             # Close ticket
             setTicketState('Closed Complete')
             setComment('Device to be repaired with SSD swapout; SSO Imprivata Project USDT Devices')
-            setVariableTaskType('Repair')
+            setVariableActionType('Repair')
             setVariableRepairAtISC('Yes')
 
 
@@ -334,13 +338,13 @@ def outputCSV(labelType):
     print("RITM for " + getTicketConfigurationItemStr() + " is " + getTicketRITMStr())
 
 
-def multiStage(finalTicketType, action, item):
-    singleStage(finalTicketType, action, item)
+def multiStage(finalTaskName, action, item):
+    singleStage(finalTaskName, action, item)
     conditions = [["State", "Open", True], ["Assignment Group", "Device Configuration (Epic)", False]]
     clickTableItem("sc_req_item.sc_task.request_item_table", conditions, "Number")  # Select the Task automatically
 
-    if finalTicketType == "rhs_restock":
-        if getTicketTaskNameStr() != finalTicketType:
+    if finalTaskName == "rhs_restock":
+        if getTicketTaskNameStr() != finalTaskName:
             raise Exception
         if action == "Restock (ISC)":
             setTicketState('Closed Complete')
@@ -354,11 +358,13 @@ def decomItem(item):
     outputCSV("Decommission")
     submitTicket()
 
+
 def restockItem(item):
 
     singleStage("rhs_restock", "Restock", item)
     outputCSV("Restock")
     submitTicket()
+
 
 def repairItemISC(item):
 
@@ -366,6 +372,7 @@ def repairItemISC(item):
     # Save RITM for current item to CSV
     outputCSV("Restock")
     submitTicket()
+
 
 def repairItemMDC(item):
 
