@@ -16,7 +16,7 @@ saveTicket = False
 driver.implicitly_wait(3)
 reviewRequired = []
 verboseLog = True
-taskType = None
+actionType = None
 
 # End global variables
 
@@ -95,7 +95,7 @@ def setVariableRepairType(str):
 
 # Set the repair location (IE, Can this item be repaired at ISC?)
 # Valid options are 'Yes' (This item can be repaired at ISC) or 'No' (This item must be repaired at MDC)
-def setVariableRepairLocation(str):
+def setVariableRepairAtISC(str):
     selenium.webdriver.support.select.Select(driver.find_element_by_xpath("//tr[3]/td/div/div/div/div[2]/select")).select_by_value(str)
 
 
@@ -276,18 +276,26 @@ def clickTableItem(table_id, listOfStuff, clickThis):
 
 # === MAIN TASK FUNCTIONS === #
 
-def singleStage(type, action):
-    if type == "rhs_restock":
+
+def singleStage(ticketType, action, item):
+    if ticketType == "rhs_restock":
+        switchToDefaultFrame()
+        search(item)
+        switchToMainFrame()
+        #  Click on the catalog tasks page
+        driver.find_element_by_xpath("//div[7]/div/div/table/tbody/tr/td[2]/span/strong/a").click()
+
+        # Locate the ticket on the catalog page
+        conditions = [["State", "Open", True], ["Assignment Group", "Device Configuration (Epic)", False]]
+        clickTableItem("sc_task_table", conditions, "Request item")  # Select RITM Automatically
+        clickTableItem("sc_req_item.sc_task.request_item_table", conditions, "Number")  # Select the Task automatically
+
         # Make sure the ticket is Open
         if getTicketStateStr() != 'Open':
             raise Exception
 
-        # Make sure the ticket is assigned to Bryan or John
-        if getTicketAssigned() != 'Bryan Shain' and getTicketAssigned() != 'John Higman':
-            raise Exception
-
         # Make sure this is a restock ticket
-        if getTicketTaskNameStr() != type:
+        if getTicketTaskNameStr() != ticketType:
             raise Exception
 
         # Mark ticket as work in progress
@@ -307,170 +315,116 @@ def singleStage(type, action):
             setTicketState('Closed Complete')
             setComment("This device is being decomissioned, won't be used for SSO, or is out of commission; send to MDC ")
             setVariableTaskType('Decommission')  # Set ticket task (Restock, Decommission, or Repair)
+        if action == "Repair (MDC)":
+            # Close ticket
+            setTicketState('Closed Complete')
+            setComment('Laptop processed for repair / SSD swap at MDC.')
+            setVariableTaskType('Repair')
+            setVariableRepairAtISC('No')
+        if action == "Repair (ISC)":
+            # Close ticket
+            setTicketState('Closed Complete')
+            setComment('Device to be repaired with SSD swapout; SSO Imprivata Project USDT Devices')
+            setVariableTaskType('Repair')
+            setVariableRepairAtISC('Yes')
 
-        # Save RITM for current item to CSV
-        appendToCSV(['', '', getTicketConfigurationItemStr(), getTicketRITMStr(), 'Restock'], 'output.csv')
-        print("RITM for " + getTicketConfigurationItemStr() + " is " + getTicketRITMStr())
-        submitTicket()
 
-def decomItem(item):
-    # Make sure we have the default/top iframe selected
-    driver.switch_to.default_content()
-    search(item)
-    switchToMainFrame()
-    #  Click on the catalog tasks page
-    driver.find_element_by_xpath("//div[7]/div/div/table/tbody/tr/td[2]/span/strong/a").click()
+def outputCSV(labelType):
+    appendToCSV(['', '', getTicketConfigurationItemStr(), getTicketRITMStr(), labelType], 'output.csv')
+    print("RITM for " + getTicketConfigurationItemStr() + " is " + getTicketRITMStr())
 
-    # Locate the ticket on the catalog page
+
+def multiStage(finalTicketType, action, item):
+    singleStage(finalTicketType, action, item)
     conditions = [["State", "Open", True], ["Assignment Group", "Device Configuration (Epic)", False]]
-    clickTableItem("sc_task_table", conditions, "Request item")  # Select RITM Automatically
     clickTableItem("sc_req_item.sc_task.request_item_table", conditions, "Number")  # Select the Task automatically
 
-    ###########################################
+    if finalTicketType == "rhs_restock":
+        if getTicketTaskNameStr() != finalTicketType:
+            raise Exception
+        if action == "Restock (ISC)":
+            setTicketState('Closed Complete')
+            setComment("Device to be repaired with SSD swapout; SSO Imprivata Project USDT Devices")
+            setVariableRepairType('onsite')
 
-    singleStage("rhs_restock", "Decom")
+
+def decomItem(item):
+
+    singleStage("rhs_restock", "Decom",item)
+    outputCSV("Decommission")
+    submitTicket()
 
 def restockItem(item):
 
-    # Make sure we have the default/top iframe selected
-    driver.switch_to.default_content()
-    search(item)
-    switchToMainFrame()
-    #  Click on the catalog tasks page
-    driver.find_element_by_xpath("//div[7]/div/div/table/tbody/tr/td[2]/span/strong/a").click()
-
-    # Locate the ticket on the catalog page
-    conditions = [["State", "Open", True], ["Assignment Group", "Device Configuration (Epic)", False]]
-    clickTableItem("sc_task_table", conditions, "Request item")  # Select RITM Automatically
-    clickTableItem("sc_req_item.sc_task.request_item_table", conditions, "Number")  # Select the Task automatically
-
-###########################################
-
-    singleStage("rhs_restock","Restock")
-
-############################################
-
-
-def repairItem(item):
-
-    # Make sure we have the default/top iframe selected
-    driver.switch_to.default_content()
-    search(item)
-    switchToMainFrame()
-    #  Click on the catalog tasks page
-    driver.find_element_by_xpath("//div[7]/div/div/table/tbody/tr/td[2]/span/strong/a").click()
-
-    conditions = [["State", "Open", True], ["Assignment Group", "Device Configuration (Epic)", False]]
-    clickTableItem("sc_task_table", conditions, "Request item")  # Select RITM Automatically
-    clickTableItem("sc_req_item.sc_task.request_item_table", conditions, "Number")  # Select the Task automatically
-
-    # Make sure the ticket is Open
-    if getTicketStateStr() != 'Open':
-        raise Exception
-
-    # Make sure the ticket is assigned to Bryan or John
-    if getTicketAssigned() != 'Bryan Shain' and getTicketAssigned() != 'John Higman':
-        raise Exception
-
-    # Make sure this is a restock ticket
-    if getTicketTaskNameStr() != 'rhs_restock':
-        raise Exception
-
-    # Mark ticket as work in progress
-    setTicketState('Work in Progress')
-    setComment('Acknowledging asset/ticket')
+    singleStage("rhs_restock", "Restock", item)
+    outputCSV("Restock")
     submitTicket()
 
-    # Close ticket
-    setTicketState('Closed Complete')
-    setComment('Device to be repaired with SSD swapout; SSO Imprivata Project USDT Devices')
-    setVariableTaskType('Repair')
-    setVariableRepairLocation('Yes')
-    submitTicket()
+def repairItemISC(item):
 
-    switchToDefaultFrame()
-    search(getTicketRITMStr)
-    waitForAlert()
-    switchToMainFrame()
-
-    #driver.find_element(By.LINK_TEXT, "Click here").click()
-
-    clickTableItem("sc_req_item.sc_task.request_item_table", conditions, "Number")  # Select the Task automatically
-
-    if getTicketTaskNameStr() != 'rhs_repair':
-        raise Exception
-
-    setComment("Device to be repaired with SSD swapout; SSO Imprivata Project USDT Devices")
-    setTicketState('Closed Complete')
-
-    # onsite corresponds to "Repair Completed" as opposed to a decom repair
-    setVariableRepairType('onsite')
-
+    multiStage("rhs_repair", "Repair (ISC)", item)
     # Save RITM for current item to CSV
-    appendToCSV(['', '', getTicketConfigurationItemStr(), getTicketRITMStr(), 'Restock'], 'output.csv')
-    print("RITM for " + getTicketConfigurationItemStr() + " is " + getTicketRITMStr())
-
+    outputCSV("Restock")
     submitTicket()
+
+def repairItemMDC(item):
+
+    singleStage("rhs_restock","Repair (MDC)", item)
+    # Save RITM for current item to CSV
+    outputCSV("Restock")
+    submitTicket()
+
 #
 #
 # End Functions
 #
 #
 
+
 # Clear any previous runs from the csv
 clearCSV('output.csv')
-
 # Set up CSV as Tim's script expects it
-appendToCSV(['Tech Name','SN','PC Name','RITM','Restock/Repair','Label Notes'],'output.csv')
-
+appendToCSV(['Tech Name', 'SN', 'PC Name', 'RITM', 'Restock/Repair', 'Label Notes'], 'output.csv')
 # Import list of computer hostnames from csv
-computers = importCSV('input.csv')
+hostnames = importCSV('input.csv')
 
-# Prompt user for type of ticket
-taskType = input("\nWhat should I do with these items?\n1 = Restock, 2 = Repair (ISC), 3 = Repair (MDC), 4 = Decommission\n")
+# Prompt user for type of action to take
+actionType = input("\nWhat should I do with these items?\n1 = Restock, 2 = Repair / SSD Swap (ISC), 3 = Laptop Repair (MDC), 4 = Decommission\n")
 
 
 # Iterate through each item and do the things
-for i in range(len(computers)):
-    print("-==========- " + computers[i] + " -==========-")
-    print(str(i+1) + " of " + str(len(computers)))
+for i in range(len(hostnames)):
+    print("-==========- " + hostnames[i] + " -==========-")
+    print(str(i+1) + " of " + str(len(hostnames)))
 
     # Open to service catalog. This is to ensure each loop begins at a known starting position.
     driver.get("https://ghsprod.service-now.com/nav_to.do?uri=%2Fcatalog_home.do%3Fsysparm_view%3Dcatalog_default")
 
     waitForAlert()
     try:
-        if taskType == '1':
-            restockItem(computers[i])
-        elif taskType == '2':
-            repairItem(computers[i])
-        elif taskType == '3':
+        if actionType == '1':
+            restockItem(hostnames[i])
+        elif actionType == '2':
+            repairItemISC(hostnames[i])
+        elif actionType == '3':
             print("MDC Repair not yet implemented")
             driver.close()
             exit()
-        elif taskType == '4':
-            #print("Decommission Not yet implemented")
-            #driver.close()
-            decomItem(computers[i])
+        elif actionType == '4':
+            decomItem(hostnames[i])
             exit()
-        elif taskType == '5':
-            driver.get("https://ghsprod.service-now.com/nav_to.do?uri=%2Fsc_task_list.do%3Fsysparm_query%3D123TEXTQUERY321%253DDT8CG7311FBZ")
-            switchToMainFrame()
-            array = tableToArray("sc_task_table")
-            print(array)
-            print(array[6][4].text)
         else:
             print("Invalid option")
             driver.close()
             exit()
     except Exception as bad:
-        print("Error in item: " + computers[i])
+        print("Error in item: " + hostnames[i])
         print("\t"+repr(bad))
-        reviewRequired.append(computers[i])
+        reviewRequired.append(hostnames[i])
         if verboseLog:
             traceback.print_tb(bad.__traceback__)
     finally:
-        if reviewRequired and i+1 == len(computers):
+        if reviewRequired:
             clearCSV('review.csv')
             print("THE FOLLOWING ITEMS REQUIRE MANUAL REVIEW! A copy has been saved to review.csv")
             for x in range(len(reviewRequired)):

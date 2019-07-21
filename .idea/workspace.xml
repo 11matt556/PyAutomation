@@ -4,7 +4,10 @@
     <bookmark url="file://$PROJECT_DIR$/main.py" line="131" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7b1979c9-b11c-4f3a-bcba-4314332d4772" name="Default Changelist" comment="" />
+    <list default="true" id="7b1979c9-b11c-4f3a-bcba-4314332d4772" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/Canned Responses.csv" beforeDir="false" afterPath="$PROJECT_DIR$/Canned Responses.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -19,8 +22,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1437">
-              <caret line="132" lean-forward="true" selection-start-line="132" selection-end-line="132" />
+            <state relative-caret-position="476">
+              <caret line="298" column="27" lean-forward="true" selection-start-line="298" selection-start-column="27" selection-end-line="298" selection-end-column="27" />
               <folding>
                 <element signature="e#0#30#0" expanded="true" />
               </folding>
@@ -31,8 +34,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Canned Responses.csv">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="51">
-              <caret line="3" selection-start-line="3" selection-end-line="3" selection-end-column="96" />
+            <state relative-caret-position="119">
+              <caret line="7" column="74" lean-forward="true" selection-start-line="7" selection-end-line="7" selection-end-column="74" />
             </state>
           </provider>
         </entry>
@@ -106,15 +109,15 @@
         <option value="$PROJECT_DIR$/test_state.py" />
         <option value="$PROJECT_DIR$/output.csv" />
         <option value="$PROJECT_DIR$/README.md" />
+        <option value="$PROJECT_DIR$/Canned Responses.csv" />
         <option value="$PROJECT_DIR$/main.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="696" />
-    <option name="y" value="72" />
+    <option name="x" value="637" />
     <option name="width" value="1449" />
-    <option name="height" value="1056" />
+    <option name="height" value="1047" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
@@ -203,20 +206,21 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="2576" height="1056" extended-state="6" />
+    <frame x="637" y="0" width="1449" height="1047" extended-state="0" />
+    <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49096385" visible="true" weight="0.07446808" />
-      <window_info id="Structure" order="1" sideWeight="0.5090361" side_tool="true" visible="true" weight="0.07446808" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49124727" visible="true" weight="0.13394755" />
+      <window_info active="true" id="Structure" order="1" sideWeight="0.50875276" side_tool="true" visible="true" weight="0.13394755" />
       <window_info id="Favorites" order="2" sideWeight="0.50150603" side_tool="true" weight="0.10063224" />
       <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.32827735" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32822758" />
       <window_info anchor="bottom" id="Run" order="2" weight="0.34236187" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32936078" />
       <window_info anchor="bottom" id="Version Control" order="7" weight="0.28060672" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="8" visible="true" weight="0.28060672" />
+      <window_info anchor="bottom" id="Terminal" order="8" weight="0.28060672" />
       <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
       <window_info anchor="bottom" id="Python Console" order="10" weight="0.32936078" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
@@ -321,15 +325,15 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Canned Responses.csv">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="51">
-          <caret line="3" selection-start-line="3" selection-end-line="3" selection-end-column="96" />
+        <state relative-caret-position="119">
+          <caret line="7" column="74" lean-forward="true" selection-start-line="7" selection-end-line="7" selection-end-column="74" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1437">
-          <caret line="132" lean-forward="true" selection-start-line="132" selection-end-line="132" />
+        <state relative-caret-position="476">
+          <caret line="298" column="27" lean-forward="true" selection-start-line="298" selection-start-column="27" selection-end-line="298" selection-end-column="27" />
           <folding>
             <element signature="e#0#30#0" expanded="true" />
           </folding>
