@@ -414,12 +414,9 @@ for i in range(len(hostnames)):
         elif actionType == '2':
             repairItemISC(hostnames[i])
         elif actionType == '3':
-            print("MDC Repair not yet implemented")
-            driver.close()
-            exit()
+            repairItemMDC(hostnames[i])
         elif actionType == '4':
             decomItem(hostnames[i])
-            exit()
         else:
             print("Invalid option")
             driver.close()
