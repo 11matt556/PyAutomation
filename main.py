@@ -317,7 +317,7 @@ def singleStage(taskName, action, item):
         if action == "Decom":
             # Close Ticket
             setTicketState('Closed Complete')
-            setComment("This device is being decomissioned, won't be used for SSO, or is out of commission; send to MDC ")
+            setComment("This device is being decommissioned, won't be used for SSO, or is out of commission; send to MDC ")
             setVariableActionType('Decommission')  # Set ticket task (Restock, Decommission, or Repair)
         if action == "Repair (MDC)":
             # Close ticket
@@ -339,11 +339,11 @@ def outputCSV(labelType):
 
 
 def multiStage(finalTaskName, action, item):
-    singleStage(finalTaskName, action, item)
+    singleStage("rhs_restock", action, item)
     conditions = [["State", "Open", True], ["Assignment Group", "Device Configuration (Epic)", False]]
     clickTableItem("sc_req_item.sc_task.request_item_table", conditions, "Number")  # Select the Task automatically
 
-    if finalTaskName == "rhs_restock":
+    if finalTaskName == "rhs_repair":
         if getTicketTaskNameStr() != finalTaskName:
             raise Exception
         if action == "Restock (ISC)":
