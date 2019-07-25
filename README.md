@@ -22,5 +22,4 @@
     - Typically this is due to no ticket being found, or a ticket being in an unexpected state
     - **"review.csv" is cleared each time the program is run**
 
-
-##**Please report any unusual behavior to me as it is very possible there are still some bugs**
+Please report any unusual behavior to me as it is very possible there are still some bugs
