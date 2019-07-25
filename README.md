@@ -8,7 +8,7 @@
 4. Open up an **admin** command prompt
 5. Run `pip install selenium`
 
-#### Typical Usage
+#### USAGE
 1. Open `input.csv` and enter the hostnames of the computers you want to work on
     - The same task will be performed on all entries!
 2. Close and save `input.csv`
@@ -18,8 +18,8 @@
 5. After the program completes it will create an `output.csv` and an `review.csv` file.
     - "output.csv" will contain the RITM for each computer in the format Tim's script is expecting
     -  **"output.csv" is cleared each time the program is run**
-6. (Optional) Any items the program encountered errors on will be printed out to the terminal, as well as saved to `review.csv` for you to manually review.
-    - Typically this is due to no ticket being found, or a ticket being in an unexpected state
+6. (Optional) If the program encountered any errors, it will print out the items that caued the errors. It will also save a copy as review.csv.
+    - Please manually review these tickets to make sure they are completed properly
     - **"review.csv" is cleared each time the program is run**
 
 Please report any unusual behavior to me as it is very possible there are still some bugs
