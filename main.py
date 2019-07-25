@@ -12,7 +12,7 @@ import csv
 
 # Start global variables
 driver = webdriver.Chrome()
-saveTicket = False
+saveTicket = True
 driver.implicitly_wait(3)
 reviewRequired = []
 verboseLog = True
@@ -302,6 +302,10 @@ def singleStage(taskName, action, item):
         if getTicketTaskNameStr() != taskName:
             raise Exception
 
+        # Better to move this so each ticket can have more specific checking
+        if getTicketAssigned() != "Bryan Shain" and getTicketAssigned() != "John Higman":
+            raise Exception
+
         # Mark ticket as work in progress
         setTicketState('Work in Progress')
         setComment("Acknowledging asset/ticket")
@@ -340,13 +344,18 @@ def outputCSV(labelType):
 
 def multiStage(finalTaskName, action, item):
     singleStage("rhs_restock", action, item)
+    submitTicket()
+    ritm = getTicketRITMStr()
+    switchToDefaultFrame()
+    search(ritm)
+    switchToMainFrame()
     conditions = [["State", "Open", True], ["Assignment Group", "Device Configuration (Epic)", False]]
     clickTableItem("sc_req_item.sc_task.request_item_table", conditions, "Number")  # Select the Task automatically
 
     if finalTaskName == "rhs_repair":
         if getTicketTaskNameStr() != finalTaskName:
             raise Exception
-        if action == "Restock (ISC)":
+        if action == "Repair (ISC)":
             setTicketState('Closed Complete')
             setComment("Device to be repaired with SSD swapout; SSO Imprivata Project USDT Devices")
             setVariableRepairType('onsite')
