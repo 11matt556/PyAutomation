@@ -7,6 +7,16 @@ import selenium.common.exceptions as seleniumExceptions
 import selenium.webdriver.support.select
 import traceback
 
+# TODO:
+# If ticket is Closed Complete and assigned to bryan,
+# Then the ticket is likely completed. Go ahead and add this
+# to output.csv with a note that it was completed earlier
+
+# TODO:
+# If you are unable to locate the ticket from the stage 1 RITM page, it may be that the
+# the RITM has not been expired. Tried to click the expire button, wait 5-10 secs, t
+# then refresh and try again.
+
 import time
 import csv
 
