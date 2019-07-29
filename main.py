@@ -336,7 +336,7 @@ def singleStage(taskName, action, item):
         if action == "Repair (MDC)":
             # Close ticket
             setTicketState('Closed Complete')
-            setComment('Laptop processed for repair / SSD swap at MDC.')
+            setComment('Device processed for repair / SSD swap at MDC.')
             setVariableActionType('Repair')
             setVariableRepairAtISC('No')
         if action == "Repair (ISC)":
@@ -397,7 +397,7 @@ def repairItemMDC(item):
 
     singleStage("rhs_restock","Repair (MDC)", item)
     # Save RITM for current item to CSV
-    outputCSV("Restock")
+    outputCSV("Repair")
     submitTicket()
 
 #
@@ -415,7 +415,7 @@ appendToCSV(['Tech Name', 'SN', 'PC Name', 'RITM', 'Restock/Repair', 'Label Note
 hostnames = importCSV('input.csv')
 
 # Prompt user for type of action to take
-actionType = input("\nWhat should I do with these items?\n1 = Restock, 2 = Repair / SSD Swap (ISC), 3 = Laptop Repair (MDC), 4 = Decommission\n")
+actionType = input("\nWhat should I do with these items?\n1 = Restock, 2 = Repair / SSD Swap (ISC), 3 = Repair (MDC), 4 = Decommission\n")
 
 
 # Iterate through each item and do the things
