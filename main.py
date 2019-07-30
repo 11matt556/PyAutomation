@@ -14,8 +14,17 @@ import traceback
 
 # TODO:
 # If you are unable to locate the ticket from the stage 1 RITM page, it may be that the
-# the RITM has not been expired. Tried to click the expire button, wait 5-10 secs, t
+# the RITM has not been expired. Try to click the expire button, wait 5-10 secs,
 # then refresh and try again.
+
+# TODO:
+# Implement logging for review and output csv's.
+
+# TODO:
+# Implement a mode to only verify tickets, but not complete them. Look for ticets that were partially complete
+
+# TODO:
+# Deal with asset management. (Create restock from scratch, hotswap, etc)
 
 import time
 import csv
