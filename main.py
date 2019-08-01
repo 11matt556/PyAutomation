@@ -452,7 +452,7 @@ for i in range(len(hostnames)):
     except Exception as bad:
         print("Error in item: " + hostnames[i])
         print("\t"+repr(bad))
-        reviewRequired.append(hostnames[i])
+        reviewRequired.append([str(hostnames[i]), traceback.format_exc()])
         if verboseLog:
             traceback.print_tb(bad.__traceback__)
     finally:
@@ -460,5 +460,5 @@ for i in range(len(hostnames)):
             clearCSV('review.csv')
             print("THE FOLLOWING ITEMS REQUIRE MANUAL REVIEW! A copy has been saved to review.csv")
             for x in range(len(reviewRequired)):
-                print("\t"+reviewRequired[x])
-                appendToCSV([reviewRequired[x]], 'review.csv')
+                print("\t"+str(reviewRequired[x]))
+                appendToCSV(reviewRequired[x], 'review.csv')
