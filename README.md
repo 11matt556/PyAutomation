@@ -22,4 +22,8 @@
     - Please manually review these tickets to make sure they are completed properly
     - **"review.csv" is cleared each time the program is run**
 
+Old versions of output.csv and review.csv can be found in the 'logs' folder. They are in the format of `Y-M-D_HM`. 
+
+These logs are not automatically deleted at any point.
+
 Please report any unusual behavior to me as it is very possible there are still some bugs
