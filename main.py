@@ -6,6 +6,9 @@ from selenium.webdriver.common.keys import Keys
 import selenium.common.exceptions as seleniumExceptions
 import selenium.webdriver.support.select
 import traceback
+import shutil
+import datetime
+import os
 
 # TODO:
 # If ticket is Closed Complete and assigned to bryan,
@@ -31,7 +34,7 @@ import csv
 
 # Start global variables
 driver = webdriver.Chrome()
-saveTicket = True
+saveTicket = False
 driver.implicitly_wait(3)
 reviewRequired = []
 verboseLog = True
@@ -322,7 +325,7 @@ def singleStage(taskName, action, item):
             raise Exception
 
         # Better to move this so each ticket can have more specific checking
-        if getTicketAssigned() != "Bryan Shain" and getTicketAssigned() != "John Higman":
+        if getTicketAssigned() != "Bryan Shain" and getTicketAssigned() != "John Higman" and getTicketAssigned() != "Tim Rogers" and getTicketAssigned() != "Matthew Hiwell":
             raise Exception
 
         # Mark ticket as work in progress
@@ -335,7 +338,7 @@ def singleStage(taskName, action, item):
         if action == "Restock":
             # Close Ticket
             setTicketState('Closed Complete')
-            setComment("Device to be restocked, SSO Imprivata Project G2-G4 Minis")
+            setComment("Device to be restocked, SSO Imprivata Project")
             setVariableActionType('Restock')  # Set ticket task (Restock, Decommission, or Repair)
         if action == "Decom":
             # Close Ticket
@@ -416,8 +419,17 @@ def repairItemMDC(item):
 #
 
 
+mDate = datetime.datetime.fromtimestamp(os.path.getmtime('review.csv')).strftime("%Y-%m-%d_%H%M")
+print(mDate)
+shutil.copy2('review.csv', 'logs/review' + mDate + '.csv')
+mDate = datetime.datetime.fromtimestamp(os.path.getmtime('output.csv')).strftime("%Y-%m-%d_%H%M")
+print(mDate)
+shutil.copy2('output.csv', 'logs/output' + mDate + '.csv')
+
+
 # Clear any previous runs from the csv
 clearCSV('output.csv')
+clearCSV('review.csv')
 # Set up CSV as Tim's script expects it
 appendToCSV(['Tech Name', 'SN', 'PC Name', 'RITM', 'Restock/Repair', 'Label Notes'], 'output.csv')
 # Import list of computer hostnames from csv
