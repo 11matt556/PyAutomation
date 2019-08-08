@@ -44,7 +44,7 @@ actionType = None
 # End global variables
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-s','--saveTicket', type=int, default=1, help="1 = save, 0 = no save. Default is 1.")
+parser.add_argument('-s','-saveTicket', type=int, default=1, help="1 = save, 0 = no save. Default is 1.")
 args = parser.parse_args()
 
 if args.s == 1:
