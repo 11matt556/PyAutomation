@@ -9,6 +9,7 @@ import traceback
 import shutil
 import datetime
 import os
+import argparse
 
 # TODO:
 # If ticket is Closed Complete and assigned to bryan,
@@ -34,13 +35,30 @@ import csv
 
 # Start global variables
 driver = webdriver.Chrome()
-saveTicket = False
+saveTicket = None
 driver.implicitly_wait(3)
 reviewRequired = []
 verboseLog = True
 actionType = None
 
 # End global variables
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-s','--saveTicket', type=int, default=1, help="1 = save, 0 = no save. Default is 1.")
+args = parser.parse_args()
+
+if args.s == 1:
+    saveTicket = True
+    print("Ticket changes will be submitted.")
+elif args.s == 0:
+    saveTicket = False
+    print("Ticket changes WILL NOT be submitted!")
+else:
+    print("Invalid selection")
+    raise Exception
+
+#print(args)
+#print(saveTicket)
 
 # Start Functions
 
@@ -418,12 +436,11 @@ def repairItemMDC(item):
 #
 #
 
-
 mDate = datetime.datetime.fromtimestamp(os.path.getmtime('review.csv')).strftime("%Y-%m-%d_%H%M")
-print(mDate)
+#print(mDate)
 shutil.copy2('review.csv', 'logs/review' + mDate + '.csv')
 mDate = datetime.datetime.fromtimestamp(os.path.getmtime('output.csv')).strftime("%Y-%m-%d_%H%M")
-print(mDate)
+#print(mDate)
 shutil.copy2('output.csv', 'logs/output' + mDate + '.csv')
 
 
