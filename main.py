@@ -43,19 +43,24 @@ actionType = None
 
 # End global variables
 
-parser = argparse.ArgumentParser()
-parser.add_argument('-s','-saveTicket', type=int, default=1, help="1 = save, 0 = no save. Default is 1.")
-args = parser.parse_args()
+#parser = argparse.ArgumentParser()
+#parser.add_argument('-s', type=int, help="1 = save, 0 = no save. Default is 1.")
+#args = parser.parse_args()
 
-if args.s == 1:
-    saveTicket = True
-    print("Ticket changes will be submitted.")
-elif args.s == 0:
-    saveTicket = False
+#print(args.s)
+
+saveTicket = True
+
+#if args.s == 1:
+ #   saveTicket = True
+#elif args.s == 0:
+ #   saveTicket = False
+#else:
+ #   print("Invalid selection")
+ #   raise Exception
+
+if saveTicket == False:
     print("Ticket changes WILL NOT be submitted!")
-else:
-    print("Invalid selection")
-    raise Exception
 
 #print(args)
 #print(saveTicket)
