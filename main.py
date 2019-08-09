@@ -49,7 +49,7 @@ actionType = None
 
 #print(args.s)
 
-saveTicket = True
+saveTicket = False
 
 #if args.s == 1:
  #   saveTicket = True
