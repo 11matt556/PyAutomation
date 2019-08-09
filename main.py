@@ -348,7 +348,7 @@ def singleStage(taskName, action, item):
             raise Exception
 
         # Better to move this so each ticket can have more specific checking
-        if getTicketAssigned() != "Bryan Shain" and getTicketAssigned() != "John Higman" and getTicketAssigned() != "Tim Rogers" and getTicketAssigned() != "Matthew Hiwell":
+        if getTicketAssigned() != "Bryan Shain" and getTicketAssigned() != "John Higman" and getTicketAssigned() != "Timothy Rogers" and getTicketAssigned() != "Matthew Howell":
             raise Exception
 
         # Mark ticket as work in progress
