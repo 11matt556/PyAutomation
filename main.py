@@ -452,6 +452,12 @@ shutil.copy2('output.csv', 'logs/output' + mDate + '.csv')
 # Clear any previous runs from the csv
 clearCSV('output.csv')
 clearCSV('review.csv')
+
+#Load canned responses
+#cannedResponses = []
+#cannedResponses = importCSV('CannedResponses.csv')
+#print(str(cannedResponses))
+
 # Set up CSV as Tim's script expects it
 appendToCSV(['Tech Name', 'SN', 'PC Name', 'RITM', 'Restock/Repair', 'Label Notes'], 'output.csv')
 # Import list of computer hostnames from csv

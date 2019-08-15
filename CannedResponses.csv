@@ -1,0 +1,8 @@
+Type,
+Acknowledge,Acknowledging asset/ticket
+Decom,This device is being decomissioned; won't be used for SSO or is out of commission; send to MDC 
+Restock (Existing),"Device to be restocked, SSO Imprivata Project G2-G4 Minis"
+Restock (Create),"Device to be restocked, SSO Imprivata Project"
+MDC Repair (G1),USDT 800-G1 to be sent in for repair/stock at MDC
+MDC Repair (Laptop),Laptop processed for repair / SSD swap at MDC.
+ISC Repair (SSD),Device to be repaired with SSD swapout; SSO Imprivata Project USDT Devices
