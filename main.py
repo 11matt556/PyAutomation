@@ -10,6 +10,13 @@ import shutil
 import datetime
 import os
 import argparse
+import win32com.client as win32
+#dymoAddIn = win32.Dispatch("DYMO.DymoAddIn")
+#dymoLabel = win32.Dispatch("DYMO.DymoLabels")
+#labelFile = 'label.label'
+#dymoAddIn.Open(labelFile)
+#dymoLabel.SetField("Tech","test")
+#dymoAddIn.Print(1, True)
 
 # TODO:
 # If ticket is Closed Complete and assigned to bryan,

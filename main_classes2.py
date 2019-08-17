@@ -33,19 +33,7 @@ class IncidentsPage:
 class RequestedItemsPage:
     pass
 
-class SearchPage:
 
-    def clickCatalogTasks(self):
-        cat = CatalogTasksPage()
-        return cat
-
-    def clickIncidents(self):
-        incident = IncidentsPage()
-        return incident
-
-    def clickRequestedItems(self):
-        requestedItems = RequestedItemsPage()
-        return requestedItems
 
 class ServiceNow:
 
@@ -66,6 +54,20 @@ class ServiceNow:
 
             class MassComputerUpdate:
                 pass
+
+class SearchPage(ServiceNow):
+
+    def clickCatalogTasks(self):
+        cat = CatalogTasksPage()
+        return cat
+
+    def clickIncidents(self):
+        incident = IncidentsPage()
+        return incident
+
+    def clickRequestedItems(self):
+        requestedItems = RequestedItemsPage()
+        return requestedItems
 
 class RequestItem:
     state = None
