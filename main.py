@@ -10,7 +10,7 @@ import shutil
 import datetime
 import os
 import argparse
-import win32com.client as win32
+#import win32com.client as win32
 #dymoAddIn = win32.Dispatch("DYMO.DymoAddIn")
 #dymoLabel = win32.Dispatch("DYMO.DymoLabels")
 #labelFile = 'label.label'
