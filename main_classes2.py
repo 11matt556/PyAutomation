@@ -15,77 +15,43 @@ import csv
 
 driver = webdriver.Chrome()
 
-class CatalogTasksPage:
-
-    def __init__(self):
-        pass
-
-    def findRequestItem(self,cond):
-        print(str(cond))
-        #Create table. Search and filter table
-        req = RequestItem()
-        return req
-
-class IncidentsPage:
-    pass
+def switchToMainFrame():
+    driver.switch_to.frame(driver.find_element_by_class_name("navpage-main-left").find_element_by_xpath(".//iframe"))
 
 
-class RequestedItemsPage:
-    pass
+def switchToDefaultFrame():
+    driver.switch_to.default_content()
 
 
-
-class ServiceNow:
-
-    def searchFor(self, string): # Need to use composition or inheritance so everything can access global ServiceNow functionality
-        print("Searching for " + string)
-        searchbox = driver.find_element_by_xpath("//*[@id='sysparm_search']")
-        searchbox.clear()
-        searchbox.click()
-        searchbox.send_keys(string)
-        searchbox.send_keys(Keys.RETURN)
-        results = SearchPage()
-        return results
-
-    class SelfService:
-        class DesktopSupport:
-            class AssetManagement:
-                pass
-
-            class MassComputerUpdate:
-                pass
-
-class SearchPage(ServiceNow):
-
-    def clickCatalogTasks(self):
-        cat = CatalogTasksPage()
-        return cat
-
-    def clickIncidents(self):
-        incident = IncidentsPage()
-        return incident
-
-    def clickRequestedItems(self):
-        requestedItems = RequestedItemsPage()
-        return requestedItems
-
-class RequestItem:
-    state = None
+class CatalogTask:
     number = None
-    item = 'yo'
+    requestItem = None
     request = None
-    requestedBy = None
-    dueDate = None
+    item = None
+    requestedFor = None
+    contactNumber = None
+    alternateNumber = None
+    shortDesciption = None
+    description = None
+    state = None
+    assignmentGroup = None
+    assignedTo = None
+    taskDueDate = None
     configurationItem = None
-    opened = None
-    openedBy = None
-    updated = None
-    stage = None
-    quantity = None
-    estimatedDelivery = None
 
     def __init__(self):
-        pass
+        switchToDefaultFrame()
+        switchToMainFrame()
+        self.number = driver.find_element_by_id("sc_task.number").get_attribute("value")
 
-serviceNow = ServiceNow()
-serviceNow.searchFor('123').clickCatalogTasks().findRequestItem(['conditions'])
+driver.get("https://prismahealth.service-now.com")
+#Login
+driver.find_element_by_xpath("//*[@id='maincontent']/tbody/tr[4]/td[2]").click()
+
+#Go to a task
+driver.get("https://prismahealth.service-now.com/nav_to.do?uri=task.do?sys_id=b537bb9e1bbff308f15a4005bd4bcb8b")
+
+task = CatalogTask()
+
+print(task.number)
+
