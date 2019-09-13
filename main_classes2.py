@@ -23,6 +23,27 @@ def switchToDefaultFrame():
     driver.switch_to.default_content()
 
 
+class Notes:
+    @staticmethod
+    def setComment(self, commentString):
+        print("Typing " + str(commentString))
+        commentArea = driver.find_element_by_xpath("//textarea[@id='activity-stream-comments-textarea']")
+        # Sometimes the comment box area is collapsed by default, so we must click the button to expand it first
+        try:
+            commentArea.send_keys(commentString)
+        except seleniumExceptions.ElementNotInteractableException:
+            driver.find_element_by_xpath("//span[2]/span/nav/div/div[2]/span/button").click()
+            commentArea.send_keys(commentString)
+
+
+class Details:
+    pass
+
+
+class Variables:
+    pass
+
+
 class CatalogTask:
     number = None
     requestItem = None
@@ -31,7 +52,7 @@ class CatalogTask:
     requestedFor = None
     contactNumber = None
     alternateNumber = None
-    shortDesciption = None
+    shortDescription = None
     description = None
     state = None
     assignmentGroup = None
@@ -39,10 +60,21 @@ class CatalogTask:
     taskDueDate = None
     configurationItem = None
 
+    notesTab = Notes()
+    detailsTab = Details()
+    variablesTab = Variables()
+
+
     def __init__(self):
         switchToDefaultFrame()
         switchToMainFrame()
         self.number = driver.find_element_by_id("sc_task.number").get_attribute("value")
+        self.requestItem = driver.find_element_by_id("sys_display.sc_task.request_item").get_attribute("value")
+        self.shortDescription = driver.find_element_by_id("sc_task.short_description").get_attribute("value")
+        self.state = selenium.webdriver.support.select.Select(driver.find_element_by_id('sc_task.state'))
+        self.assignedTo = driver.find_element_by_id('sys_display.sc_task.assigned_to').get_attribute("value")
+
+
 
 driver.get("https://prismahealth.service-now.com")
 #Login
@@ -53,5 +85,7 @@ driver.get("https://prismahealth.service-now.com/nav_to.do?uri=task.do?sys_id=b5
 
 task = CatalogTask()
 
-print(task.number)
+print(task.state)
+
+task.notesTab.setComment("123")
 
