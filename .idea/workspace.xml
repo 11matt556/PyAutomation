@@ -39,8 +39,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main_classes2.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="208">
-              <caret line="45" selection-start-line="45" selection-end-line="45" />
+            <state relative-caret-position="448">
+              <caret line="70" lean-forward="true" selection-start-line="70" selection-end-line="70" />
               <folding>
                 <element signature="e#0#30#0" expanded="true" />
               </folding>
@@ -66,6 +66,7 @@
       <find>switch</find>
       <find>state</find>
       <find>comment</find>
+      <find>SpotifyServiceBuilder</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -82,11 +83,11 @@
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds">
-    <option name="x" value="726" />
-    <option name="y" value="153" />
-    <option name="width" value="1026" />
-    <option name="height" value="753" />
+  <component name="ProjectFrameBounds" extendedState="7">
+    <option name="x" value="880" />
+    <option name="y" value="56" />
+    <option name="width" value="1151" />
+    <option name="height" value="1023" />
   </component>
   <component name="ProjectId" id="1PRdJk4hLIXob3A41oZDzwbAQyC" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
@@ -270,15 +271,15 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="726" y="153" width="1026" height="753" extended-state="0" />
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="7" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.47206703" visible="true" weight="0.2540486" />
-      <window_info id="Structure" order="1" sideWeight="0.52793294" side_tool="true" visible="true" weight="0.2540486" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.4750378" visible="true" weight="0.13224447" />
+      <window_info id="Structure" order="1" sideWeight="0.5249622" side_tool="true" visible="true" weight="0.13224447" />
       <window_info id="Favorites" order="2" sideWeight="0.50150603" side_tool="true" weight="0.10063224" />
       <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.32641292" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.42258066" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32580644" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.283857" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -403,8 +404,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/main_classes2.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="208">
-          <caret line="45" selection-start-line="45" selection-end-line="45" />
+        <state relative-caret-position="448">
+          <caret line="70" lean-forward="true" selection-start-line="70" selection-end-line="70" />
           <folding>
             <element signature="e#0#30#0" expanded="true" />
           </folding>
