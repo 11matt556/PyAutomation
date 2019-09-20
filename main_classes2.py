@@ -4,7 +4,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 import selenium.common.exceptions as seleniumExceptions
-import selenium.webdriver.support.select
+import selenium.webdriver.support.select as select
 import traceback
 import shutil
 import datetime
@@ -15,7 +15,7 @@ import csv
 
 driver = webdriver.Chrome()
 
-def switchToMainFrame():
+def switchToContentFrame():
     driver.switch_to.frame(driver.find_element_by_class_name("navpage-main-left").find_element_by_xpath(".//iframe"))
 
 
@@ -24,8 +24,10 @@ def switchToDefaultFrame():
 
 
 class Notes:
-    @staticmethod
+
     def setAdditionalComments(self, commentString):
+        switchToDefaultFrame()
+        switchToContentFrame()
         print("Typing " + str(commentString))
         commentArea = driver.find_element_by_xpath("//textarea[@id='activity-stream-comments-textarea']")
         # Sometimes the comment box area is collapsed by default, so we must click the button to expand it first
@@ -48,6 +50,8 @@ class Details:
     def __init__(self):
         self.taskName = driver.find_element_by_id("sc_task.u_task_name").get_attribute("value")
 
+    def get_task_name(self):
+        return self.taskName
 
 class CatalogTask:
     notesTab = None
@@ -56,13 +60,13 @@ class CatalogTask:
 
     def __init__(self):
         switchToDefaultFrame()
-        switchToMainFrame()
+        switchToContentFrame()
         self.notesTab = Notes()
         self.detailsTab = Details()
         self.number = driver.find_element_by_id("sc_task.number").get_attribute("value")
         self.requestItem = driver.find_element_by_id("sys_display.sc_task.request_item").get_attribute("value")
         self.shortDescription = driver.find_element_by_id("sc_task.short_description").get_attribute("value")
-        self.state = selenium.webdriver.support.select.Select(driver.find_element_by_id('sc_task.state'))
+        self.state = select.Select(driver.find_element_by_id('sc_task.state'))
         self.assignedTo = driver.find_element_by_id('sys_display.sc_task.assigned_to').get_attribute("value")
 
     def get_state(self):
@@ -73,18 +77,28 @@ class CatalogTask:
         driver.find_element_by_id('sc_task.state').find_element_by_xpath("//option[. = '" + state + "']").click()
         self.state = state
 
+#For Catalog Tasks of type dm_restock
+class DMRestockVariables:
+    def __init__(self):
+        self.restock_decom_repair = select.Select(driver.find_element_by_xpath("//tr[5]/td/div/div/div/div[2]/select"))
 
-class RestockVariables:
-    pass
+    def set_restock_decom_repair(self, value):
+        try:
+            self.restock_decom_repair.select_by_value(value)
+        except seleniumExceptions.ElementNotInteractableException:
+            driver.find_element_by_xpath("//span[3]/span/nav/div/div[2]/span/button").click()
+            self.restock_decom_repair.select_by_value(value)
 
-class RepairVariables:
+
+#For Catalog Tasks of type dm_repair
+class DMRepairVariables:
     pass
 
 
 class RestockTask(CatalogTask):
     def __init__(self):
         CatalogTask.__init__(self)
-        self.variablesTab = RestockVariables()
+        self.variablesTab = DMRestockVariables()
 
 class RepairTask(CatalogTask):
     #Stuff for repair
@@ -114,7 +128,7 @@ class Table:
 
     def __init__(self, table_id):
         switchToDefaultFrame()
-        switchToMainFrame()
+        switchToContentFrame()
         print("Loading table")
         self.table = driver.find_element_by_id(table_id)
         self.table_head = self.table.find_element_by_tag_name("thead")
@@ -193,23 +207,15 @@ driver.find_element_by_xpath("//*[@id='maincontent']/tbody/tr[4]/td[2]").click()
 ServiceNow.tickets_assigned_to_tim()
 
 tims_table = Table("task_table")
-#print(tims_table.get_row_body(2))
-#print(tims_table.get_cell_body(2, 2))
-
-#print(tims_table.get_row_head(0))
-#print(tims_table.get_cell_head(0, 2))
-
-#Find which column is Configuration Item
-#print(str(tims_table.get_col_by_name("Configuration item")))
-
-#Find which column is State
-#print(str(tims_table.get_col_by_name("State")))
-
-#Find which column is Number
-#print(str(tims_table.get_col_by_name("Number")))
 
 #Find cell with task SCTASK0031734
 tims_table.get_cell_by_column_and_name("Number","SCTASK0031734").click()
+
+driver.get("https://prismahealth.service-now.com/nav_to.do?uri=%2Fsc_task.do%3Fsys_id%3Df59190fc1bc48410f15a4005bd4bcb9b%26sysparm_view%3Dtext_search")
+
+dm_restock = RestockTask()
+
+dm_restock.notesTab.setAdditionalComments("This is a test")
 
 #task = CatalogTask()
 #print(str(task.get_state()))
