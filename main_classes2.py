@@ -164,9 +164,20 @@ class Table:
         return str(self.get_cell_head(0, c).get_attribute("glide_label"))
 
     def get_col_by_name(self, name):
-        for i in range(tims_table.get_col_len_head()):
-            if tims_table.get_col_name(i).lower() == name.lower():
+        for i in range(self.get_col_len_head()):
+            if self.get_col_name(i).lower() == name.lower():
                 return i
+
+    def get_cell_by_column_and_name(self, colName, cellName):
+        for row in range(self.get_row_len_body()):
+            col = self.get_col_by_name(colName)
+            cell = self.get_cell_body(row, col)
+            print(str(row) + "," +str(col) + " " + cell.text)
+
+            if str(cell.text).lower() == cellName.lower():
+                print("FOUND CELL MATCHING CRITERIA [column=" + colName + " text=" + cellName + "]")
+                print(cell)
+                return cell
 
 
 ServiceNow.homepage()
@@ -182,20 +193,23 @@ driver.find_element_by_xpath("//*[@id='maincontent']/tbody/tr[4]/td[2]").click()
 ServiceNow.tickets_assigned_to_tim()
 
 tims_table = Table("task_table")
-print(tims_table.get_row_body(2))
-print(tims_table.get_cell_body(2, 2))
+#print(tims_table.get_row_body(2))
+#print(tims_table.get_cell_body(2, 2))
 
-print(tims_table.get_row_head(0))
-print(tims_table.get_cell_head(0, 2))
+#print(tims_table.get_row_head(0))
+#print(tims_table.get_cell_head(0, 2))
 
 #Find which column is Configuration Item
-print(str(tims_table.get_col_by_name("Configuration item")))
+#print(str(tims_table.get_col_by_name("Configuration item")))
 
 #Find which column is State
-print(str(tims_table.get_col_by_name("State")))
+#print(str(tims_table.get_col_by_name("State")))
 
 #Find which column is Number
-print(str(tims_table.get_col_by_name("Number")))
+#print(str(tims_table.get_col_by_name("Number")))
+
+#Find cell with task SCTASK0031734
+tims_table.get_cell_by_column_and_name("Number","SCTASK0031734").click()
 
 #task = CatalogTask()
 #print(str(task.get_state()))
