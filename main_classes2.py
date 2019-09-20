@@ -138,30 +138,35 @@ class Table:
 
     def get_row_body(self, r):
         row_items = self.rows_body[r].find_elements_by_tag_name("td")
-        print("Getting row " + str(r))
-        for item in row_items:
-            print(item.text)
+        #print("Getting row " + str(r))
+        #for item in row_items:
+            #print(item.text)
         return row_items
 
     def get_row_head(self, r):
         row_items = self.rows_head[r].find_elements_by_tag_name("th")
-        print("Getting row " + str(r))
-        for item in row_items:
-            print(item.get_attribute("glide_label"))
+        #print("Getting row " + str(r))
+        #for item in row_items:
+            #print(item.get_attribute("glide_label"))
         return row_items
 
     def get_cell_body(self, r, c):
         cell = self.get_row_body(r)[c]
-        print("row:" + str(r) + " col:" + str(c) + " is " + cell.text)
+        #print("row:" + str(r) + " col:" + str(c) + " is " + cell.text)
         return cell
 
     def get_cell_head(self, r, c):
         cell = self.get_row_head(r)[c]
-        print("row:" + str(r) + " col:" + str(c) + " is " + cell.get_attribute("glide_label"))
+        #print("row:" + str(r) + " col:" + str(c) + " is " + cell.get_attribute("glide_label"))
         return cell
 
-    def get_col_name(self, c):
-        return self.get_cell_head(0, c).get_attribute("glide_label")
+    def get_col_name(self, c) -> str:
+        return str(self.get_cell_head(0, c).get_attribute("glide_label"))
+
+    def get_col_by_name(self, name):
+        for i in range(tims_table.get_col_len_head()):
+            if tims_table.get_col_name(i).lower() == name.lower():
+                return i
 
 
 ServiceNow.homepage()
@@ -176,12 +181,21 @@ driver.find_element_by_xpath("//*[@id='maincontent']/tbody/tr[4]/td[2]").click()
 
 ServiceNow.tickets_assigned_to_tim()
 
-assigned = Table("task_table")
-print(assigned.get_row_body(2))
-print(assigned.get_cell_body(2, 2))
+tims_table = Table("task_table")
+print(tims_table.get_row_body(2))
+print(tims_table.get_cell_body(2, 2))
 
-print(assigned.get_row_head(0))
-print(assigned.get_cell_head(0,2))
+print(tims_table.get_row_head(0))
+print(tims_table.get_cell_head(0, 2))
+
+#Find which column is Configuration Item
+print(str(tims_table.get_col_by_name("Configuration item")))
+
+#Find which column is State
+print(str(tims_table.get_col_by_name("State")))
+
+#Find which column is Number
+print(str(tims_table.get_col_by_name("Number")))
 
 #task = CatalogTask()
 #print(str(task.get_state()))
