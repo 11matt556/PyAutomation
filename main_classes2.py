@@ -56,6 +56,23 @@ class CSV:
             print("Result: " + str(outputArray))
             return outputArray
 
+    @staticmethod
+    def appendToCSV(rowArray, csvFile):
+        with open(csvFile, 'a', newline='') as writeFile:
+            writer = csv.writer(writeFile)
+            writer.writerow(rowArray)
+        writeFile.close()
+
+
+    @staticmethod
+    def clearCSV(csvFile):
+        writeFile = open(csvFile, "w+")
+        writeFile.close()
+
+   # @staticmethod
+    #def outputCSV(labelType):
+     #   appendToCSV(['', '', getTicketConfigurationItemStr(), getTicketRITMStr(), labelType], 'output.csv')
+      #  print("RITM for " + getTicketConfigurationItemStr() + " is " + getTicketRITMStr())
 
 class CatalogTask:
     notes_tab = None
@@ -75,6 +92,9 @@ class CatalogTask:
 
     def get_state(self):
         return self.state
+
+    def get_ritm(self) -> str:
+        return self.requestItem
 
     def set_state(self, state):
         print("Setting ticket state to " + state)
@@ -309,7 +329,6 @@ dm_restock.set_state(__VALID_STATES['cc'])
 dm_restock.notes_tab.setAdditionalComments(__CANNED_RESPONSES['restock'])
 dm_restock.variablesTab.select_restock_decom_repair("restock")
 dm_restock.submit()
-
 
 #task = CatalogTask()
 #print(str(task.get_state()))
