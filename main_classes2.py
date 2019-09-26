@@ -13,6 +13,8 @@ import argparse
 import time
 import csv
 
+# TODO: Fix 'Message: unexpected alert open: {Alert text : }' due to "Actual Start" sometimes not being automatically filled in.
+
 __CANNED_RESPONSES = {
     "acknowledge":      "Acknowledging asset/ticket",
     "restock":          "Device to be restocked, W10 Rollout; Device has been tested and wiped",
@@ -27,7 +29,7 @@ __VALID_STATES = {
     "cc": "Closed Complete"
 }
 
-SAVE_TICKET = False
+SAVE_TICKET = True
 
 driver = webdriver.Chrome()
 
@@ -57,10 +59,10 @@ class CSV:
             return outputArray
 
     @staticmethod
-    def appendToCSV(rowArray, csvFile):
+    def appendToCSV(row, csvFile):
         with open(csvFile, 'a', newline='') as writeFile:
             writer = csv.writer(writeFile)
-            writer.writerow(rowArray)
+            writer.writerow(row)
         writeFile.close()
 
 
@@ -68,11 +70,6 @@ class CSV:
     def clearCSV(csvFile):
         writeFile = open(csvFile, "w+")
         writeFile.close()
-
-   # @staticmethod
-    #def outputCSV(labelType):
-     #   appendToCSV(['', '', getTicketConfigurationItemStr(), getTicketRITMStr(), labelType], 'output.csv')
-      #  print("RITM for " + getTicketConfigurationItemStr() + " is " + getTicketRITMStr())
 
 class CatalogTask:
     notes_tab = None
@@ -154,7 +151,7 @@ class Notes:
 class RepairVar:
     pass
 
-class RepairTask(CatalogTask):
+class DmRepair(CatalogTask):
     #Stuff for repair
     pass
 
@@ -193,7 +190,7 @@ class RestockVar:
             dropdown.select_by_value("No")
 
 
-class RestockTask(CatalogTask):
+class DmRestock(CatalogTask):
     def __init__(self):
         CatalogTask.__init__(self)
         self.variablesTab = RestockVar()
@@ -211,6 +208,17 @@ class ServiceNow:
     @staticmethod
     def homepage():
         driver.get("https://prismahealth.service-now.com")
+
+    @staticmethod
+    def waitForAlert():
+        try:
+            WebDriverWait(driver, 1).until(EC.alert_is_present(), 'Timed out waiting for confirmation popup to appear.')
+            alertObj = driver.switch_to.alert
+            alertObj.accept()
+            print("Accepted Alert")
+        except seleniumExceptions.TimeoutException as e:
+            # print("No alert to accept")
+            pass
 
 
 
@@ -290,45 +298,58 @@ class Table:
                 return [row, col]
 
 
-#test csv
-csv = CSV.import_csv('input.csv')
-print(csv[0][1])
+def doDecom(hostname):
+    print("DECOMMISSIONING " + hostname)
+    dm_restock = DmRestock()
+    #dm_restock.set_state(__VALID_STATES['wip'])
+    #dm_restock.notes_tab.setAdditionalComments(__CANNED_RESPONSES["acknowledge"])
+    #dm_restock.submit()
+
+    dm_restock.set_state(__VALID_STATES['cc'])
+    dm_restock.notes_tab.setAdditionalComments(__CANNED_RESPONSES['decommission'])
+    dm_restock.variablesTab.select_restock_decom_repair("decommission")
+    ritm = dm_restock.get_ritm()
+    dm_restock.submit()
+
+    CSV.appendToCSV(['', '', hostname, dm_restock.get_ritm(), "Decommission"], 'output.csv')
+
+
+computers = CSV.import_csv('input.csv')
 
 ServiceNow.homepage()
 
 #Login
 driver.find_element_by_xpath("//*[@id='maincontent']/tbody/tr[4]/td[2]").click()
+CSV.clearCSV('output.csv')
+
+for item in computers:
+    hostname = item[0]
+    task = item[1]
+
+    ServiceNow.tickets_assigned_to_tim()
+
+    if SAVE_TICKET == False:
+        ServiceNow.waitForAlert()
+
+    tims_table = Table("task_table")
+    item_pos = tims_table.get_cell_pos_by_col("Configuration item", hostname)
+    taskCol = tims_table.get_col_by_name("number")
+    tims_table.get_body_cell(item_pos[0], taskCol).click()
+
+    try:
+        if task == "Decommission":
+            doDecom(hostname)
+        elif task == "Restock":
+            pass
+    except Exception as e:
+        print(hostname+": "+ "Something went wrong!")
+        traceback.print_tb(e.__traceback__)
 
 
 
-#Go to a task
-#driver.get("https://prismahealth.service-now.com/nav_to.do?uri=task.do?sys_id=b537bb9e1bbff308f15a4005bd4bcb8b")
 
-#Go to tickets assigned to Tim"
-
-ServiceNow.tickets_assigned_to_tim()
-
-tims_table = Table("task_table")
-
-#Find task of DT2UA4501XVD
-item_pos = tims_table.get_cell_pos_by_col("Configuration item", "DT2UA4501XVD")
-taskCol = tims_table.get_col_by_name("number")
-tims_table.get_body_cell(item_pos[0], taskCol).click()
 
 
 #driver.get("https://prismahealth.service-now.com/nav_to.do?uri=%2Fsc_task.do%3Fsys_id%3Df59190fc1bc48410f15a4005bd4bcb9b%26sysparm_view%3Dtext_search")
-
-
-
-dm_restock = RestockTask()
-dm_restock.set_state(__VALID_STATES['wip'])
-dm_restock.notes_tab.setAdditionalComments(__CANNED_RESPONSES["acknowledge"])
-dm_restock.submit()
-
-dm_restock.set_state(__VALID_STATES['cc'])
-dm_restock.notes_tab.setAdditionalComments(__CANNED_RESPONSES['restock'])
-dm_restock.variablesTab.select_restock_decom_repair("restock")
-dm_restock.submit()
-
 #task = CatalogTask()
 #print(str(task.get_state()))

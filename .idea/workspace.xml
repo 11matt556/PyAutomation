@@ -3,7 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="7b1979c9-b11c-4f3a-bcba-4314332d4772" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/input.csv" beforeDir="false" afterPath="$PROJECT_DIR$/input.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main_classes2.py" beforeDir="false" afterPath="$PROJECT_DIR$/main_classes2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/output.csv" beforeDir="false" afterPath="$PROJECT_DIR$/output.csv" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -19,8 +21,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="191">
-              <caret line="185" selection-start-line="185" selection-end-line="202" selection-end-column="26" />
+            <state relative-caret-position="270">
+              <caret line="484" selection-start-line="484" selection-end-line="484" selection-end-column="18" />
               <folding>
                 <element signature="e#0#30#0" expanded="true" />
               </folding>
@@ -31,11 +33,29 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main_classes2.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="509">
-              <caret line="309" column="53" selection-start-line="309" selection-start-column="53" selection-end-line="309" selection-end-column="53" />
+            <state relative-caret-position="185">
+              <caret line="309" column="23" lean-forward="true" selection-start-line="309" selection-start-column="23" selection-end-line="309" selection-end-column="23" />
               <folding>
                 <element signature="e#0#30#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python37-32/Lib/site-packages/selenium/webdriver/support/select.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="207">
+              <caret line="78" selection-start-line="78" selection-end-line="78" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python37-32/Lib/site-packages/selenium/webdriver/remote/switch_to.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="207">
+              <caret line="64" selection-start-line="64" selection-end-line="64" />
             </state>
           </provider>
         </entry>
@@ -62,7 +82,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>csv</find>
       <find>wait</find>
       <find>switch</find>
       <find>comment</find>
@@ -74,6 +93,8 @@
       <find>submit</find>
       <find>decomm</find>
       <find>impo</find>
+      <find>csv</find>
+      <find>alert</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -83,17 +104,17 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/input.csv" />
-        <option value="$PROJECT_DIR$/main.py" />
         <option value="$PROJECT_DIR$/../../csvParse/main.py" />
         <option value="$PROJECT_DIR$/../csvParse/main.py" />
+        <option value="$PROJECT_DIR$/main.py" />
         <option value="$PROJECT_DIR$/main_classes2.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="857" />
-    <option name="y" value="19" />
-    <option name="width" value="1024" />
+    <option name="x" value="1089" />
+    <option name="y" value="6" />
+    <option name="width" value="826" />
     <option name="height" value="1042" />
   </component>
   <component name="ProjectId" id="1PRdJk4hLIXob3A41oZDzwbAQyC" />
@@ -278,21 +299,21 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="857" y="19" width="1024" height="1042" extended-state="0" />
+    <frame x="1089" y="6" width="826" height="1042" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.4723032" visible="true" weight="0.14908722" />
-      <window_info id="Structure" order="1" sideWeight="0.5276968" side_tool="true" visible="true" weight="0.14908722" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.47311828" visible="true" weight="0.18654822" />
+      <window_info id="Structure" order="1" sideWeight="0.5268817" side_tool="true" visible="true" weight="0.18654822" />
       <window_info id="Favorites" order="2" sideWeight="0.50150603" side_tool="true" weight="0.10063224" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32563257" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.28382838" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.28382838" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32741934" />
       <window_info anchor="bottom" id="Version Control" order="7" weight="0.27951002" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="8" visible="true" weight="0.24532454" />
+      <window_info anchor="bottom" id="Terminal" order="8" weight="0.24532454" />
       <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" weight="0.32936078" />
       <window_info anchor="bottom" id="Python Console" order="10" weight="0.32850778" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
@@ -399,20 +420,34 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python37-32/Lib/site-packages/selenium/webdriver/remote/switch_to.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="207">
+          <caret line="64" selection-start-line="64" selection-end-line="64" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="191">
-          <caret line="185" selection-start-line="185" selection-end-line="202" selection-end-column="26" />
+        <state relative-caret-position="270">
+          <caret line="484" selection-start-line="484" selection-end-line="484" selection-end-column="18" />
           <folding>
             <element signature="e#0#30#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python37-32/Lib/site-packages/selenium/webdriver/support/select.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="207">
+          <caret line="78" selection-start-line="78" selection-end-line="78" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/main_classes2.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="509">
-          <caret line="309" column="53" selection-start-line="309" selection-start-column="53" selection-end-line="309" selection-end-column="53" />
+        <state relative-caret-position="185">
+          <caret line="309" column="23" lean-forward="true" selection-start-line="309" selection-start-column="23" selection-end-line="309" selection-end-column="23" />
           <folding>
             <element signature="e#0#30#0" expanded="true" />
           </folding>
