@@ -13,8 +13,6 @@ import argparse
 import time
 import csv
 
-# TODO: Fix 'Message: unexpected alert open: {Alert text : }' due to "Actual Start" sometimes not being automatically filled in.
-
 __CANNED_RESPONSES = {
     "acknowledge":      "Acknowledging asset/ticket",
     "restock":          "Device to be restocked, W10 Rollout; Device has been tested and wiped",
@@ -32,6 +30,8 @@ __VALID_STATES = {
 SAVE_TICKET = True
 
 driver = webdriver.Chrome()
+
+driver.implicitly_wait(1)
 
 def switchToContentFrame():
     driver.switch_to.frame(driver.find_element_by_class_name("navpage-main-left").find_element_by_xpath(".//iframe"))
@@ -118,7 +118,7 @@ class CatalogTask:
 
 
 class Details:
-    actualStart = None
+    actual_start_button = None
     sequence = None
     serviceType = None
     taskName = None
@@ -128,16 +128,20 @@ class Details:
 
     def __init__(self):
         self.taskName = driver.find_element_by_id("sc_task.u_task_name").get_attribute("value")
+        self.actual_start_button = driver.find_element_by_xpath("//div[2]/div/div/div/div[2]/div[2]/span/span/button")
 
     def get_task_name(self):
         return self.taskName
 
+    def get_actual_start_button(self):
+        return self.actual_start_button
+
+    def accept_actual_start(self):
+        driver.find_element_by_xpath("//button[@id='GwtDateTimePicker_ok']").click()
 
 class Notes:
 
     def setAdditionalComments(self, commentString):
-        switchToDefaultFrame()
-        switchToContentFrame()
         print("Typing " + str(commentString))
         commentArea = driver.find_element_by_xpath("//textarea[@id='activity-stream-comments-textarea']")
         # Sometimes the comment box area is collapsed by default, so we must click the button to expand it first
@@ -309,6 +313,10 @@ def doDecom(hostname):
     dm_restock.notes_tab.setAdditionalComments(__CANNED_RESPONSES['decommission'])
     dm_restock.variablesTab.select_restock_decom_repair("decommission")
     ritm = dm_restock.get_ritm()
+    dm_restock.details_tab.get_actual_start_button().click()
+    #time.sleep(3)
+    dm_restock.details_tab.accept_actual_start()
+    #time.sleep(3)
     dm_restock.submit()
 
     CSV.appendToCSV(['', '', hostname, dm_restock.get_ritm(), "Decommission"], 'output.csv')
@@ -321,6 +329,7 @@ ServiceNow.homepage()
 #Login
 driver.find_element_by_xpath("//*[@id='maincontent']/tbody/tr[4]/td[2]").click()
 CSV.clearCSV('output.csv')
+CSV.appendToCSV(['Tech Name', 'SN', 'PC Name', 'RITM', 'Restock/Repair', 'Label Notes'], 'output.csv')
 
 for item in computers:
     hostname = item[0]
