@@ -33,6 +33,7 @@ driver = webdriver.Chrome()
 
 driver.implicitly_wait(1)
 
+
 def switchToContentFrame():
     driver.switch_to.frame(driver.find_element_by_class_name("navpage-main-left").find_element_by_xpath(".//iframe"))
 
@@ -321,6 +322,25 @@ def doDecom(hostname):
 
     CSV.appendToCSV(['', '', hostname, dm_restock.get_ritm(), "Decommission"], 'output.csv')
 
+
+def doRestock(hostname):
+    print("RESTOCKING " + hostname)
+    dm_restock = DmRestock()
+    #dm_restock.set_state(__VALID_STATES['wip'])
+    #dm_restock.notes_tab.setAdditionalComments(__CANNED_RESPONSES["acknowledge"])
+    #dm_restock.submit()
+
+    dm_restock.set_state(__VALID_STATES['cc'])
+    dm_restock.notes_tab.setAdditionalComments(__CANNED_RESPONSES['restock'])
+    dm_restock.variablesTab.select_restock_decom_repair("restock")
+    ritm = dm_restock.get_ritm()
+    dm_restock.details_tab.get_actual_start_button().click()
+    #time.sleep(3)
+    dm_restock.details_tab.accept_actual_start()
+    #time.sleep(3)
+    dm_restock.submit()
+
+    CSV.appendToCSV(['', '', hostname, dm_restock.get_ritm(), "restock"], 'output.csv')
 
 computers = CSV.import_csv('input.csv')
 
