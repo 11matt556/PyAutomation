@@ -255,14 +255,14 @@ class Table:
     def __init__(self, table_id):
         switchToDefaultFrame()
         switchToContentFrame()
-        print("Loading table")
+        print("Loading table...")
         self.table = driver.find_element_by_id(table_id)
         self.table_head = self.table.find_element_by_tag_name("thead")
         self.table_body = self.table.find_element_by_tag_name("tbody")
 
-        elements = []
         self.rows_body = self.table_body.find_elements_by_tag_name("tr")
         self.rows_head = self.table_head.find_elements_by_tag_name("tr")
+        print("Table loaded")
 
     def get_header_row_len(self):
         return len(self.rows_head)
@@ -303,21 +303,24 @@ class Table:
     def get_col_name(self, c) -> str:
         return str(self.get_header_cell(0, c).get_attribute("glide_label"))
 
-    def get_col_by_name(self, name) -> int:
+    def find_col_with_name(self, name) -> int:
         for i in range(self.get_header_col_len()):
             if self.get_col_name(i).lower() == name.lower():
                 return i
 
-# Returns row of cell, not the cell itself!
-    def find_cell_in_col(self, colName, cellName) -> list:
+    # Returns row of cell, not the cell itself!
+    def find_in_col(self, cellName, colName) -> list:
+        print("----Looking for "+ cellName + " in " + colName + "----")
         for row in range(self.get_body_row_len()):
-            col = self.get_col_by_name(colName)
+            col = self.find_col_with_name(colName)
             cell = self.get_body_cell(row, col)
-            print(str(row) + "," +str(col) + " " + cell.text)
+            #print(str(row) + "," +str(col) + " " + cell.text)
 
             if str(cell.text).lower() == cellName.lower():
-                print("FOUND CELL!")
+                print("FOUND " + cellName + " in row " + row)
                 return row
+            else:
+                print("Unable to find " + cellName)
 
 
 def doDecom(hostname):
@@ -359,7 +362,7 @@ def doRestock(hostname):
 
     CSV.appendToCSV(['', '', hostname, dm_restock.get_ritm(), "restock"], 'output.csv')
 
-# repar_type can be "isc", or "mdc"
+# repair_type can be "isc", or "mdc"
 def doRepair(hostname, repair_type):
     print("REPAIRING " + hostname)
     dm_restock = DmRestock()
@@ -373,19 +376,22 @@ def doRepair(hostname, repair_type):
     if repair_type == "isc":
         dm_restock.notes_tab.setAdditionalComments(__CANNED_RESPONSES['repair_isc_ssd'])
         dm_restock.variables_tab.select_complete_at("isc")
-        #Go to RITM page
+
+        # Go to RITM page
         ServiceNow.search(ritm)
-        #Find and go to open repair task
+
+        # Find and go to open repair task
         table = Table("sc_req_item.sc_task.request_item_table")
-        state_col = table.get_col_by_name("State")
-        task_col = table.get_col_by_name("Number")
-        desc_col = table.get_col_by_name("Short description")
+        state_col = table.find_col_with_name("State")
+        task_col = table.find_col_with_name("Number")
+        desc_col = table.find_col_with_name("Short description")
 
-        cell_row = table.find_cell_in_col("state", "open")
+        cell_row = table.find_in_col("open", "state")
 
-        table.get_body_cell(cell[0],task_col).click()
+        table.get_body_cell(cell_row,task_col).click()
+        raise NotImplementedError
 
-        #Complete repair
+        # Complete repair
 
     elif repair_type == "mdc":
         dm_restock.notes_tab.setAdditionalComments((__CANNED_RESPONSES['mdc']))
@@ -397,10 +403,12 @@ def doRepair(hostname, repair_type):
     dm_restock.details_tab.accept_actual_start()
     #time.sleep(3)
 
-    raise NotImplementedError
+
     #dm_restock.submit()
 
 computers = CSV.import_csv('input.csv')
+
+# TODO: Check CSV for errors (eg, "decom" instead of "decommission"
 
 ServiceNow.homepage()
 
@@ -411,7 +419,8 @@ CSV.appendToCSV(['Tech Name', 'SN', 'PC Name', 'RITM', 'Restock/Repair', 'Label 
 
 for item in computers:
     hostname = item[0]
-    task = item[1]
+    task = str(item[1]).lower()
+    print("====================" + hostname + " (" + task + ")" + "====================")
 
     ServiceNow.tims_queue()
 
@@ -419,14 +428,14 @@ for item in computers:
         ServiceNow.waitForAlert()
 
     tims_table = Table("task_table")
-    item_row = tims_table.find_cell_in_col("Configuration item", hostname)
-    taskCol = tims_table.get_col_by_name("number")
+    item_row = tims_table.find_in_col(hostname, "Configuration item")
+    taskCol = tims_table.find_col_with_name("number")
     tims_table.get_body_cell(item_row, taskCol).click()
 
     try:
-        if task == "Decommission":
+        if task == "decommission":
             doDecom(hostname)
-        elif task == "Restock":
+        elif task == "restock":
             pass
     except Exception as e:
         print(hostname+": "+ "Something went wrong!")
