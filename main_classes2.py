@@ -211,7 +211,7 @@ class DmRestock(CatalogTask):
 
 class ServiceNow:
     @staticmethod
-    def tickets_assigned_to_tim():
+    def tims_queue():
         driver.get("https://prismahealth.service-now.com/nav_to.do?uri=%2Ftask_list.do%3Fsysparm_fixed_query%3D%26sysparm_query%3Dactive%253Dtrue%255Eassigned_to%253D78ae421e1b4fb700f15a4005bd4bcb8d%26sysparm_clear_stack%3Dtrue")
 
     @staticmethod
@@ -233,7 +233,17 @@ class ServiceNow:
             # print("No alert to accept")
             pass
 
-
+    @staticmethod
+    def search(inputString):
+        switchToDefaultFrame()
+        print("Searching for " + inputString)
+        searchbox = driver.find_element_by_xpath("//*[@id='sysparm_search']")
+        searchbox.clear()
+        searchbox.click()
+        searchbox.send_keys(inputString)
+        searchbox.send_keys(Keys.RETURN)
+        switchToDefaultFrame()
+        switchToContentFrame()
 
 class Table:
     table = None
@@ -360,9 +370,14 @@ def doRepair(hostname, repair_type):
     dm_restock.variables_tab.select_restock_decom_repair("repair")
     dm_restock.details_tab.get_actual_start_button().click()
 
+    ritm = dm_restock.get_ritm()
     if repair_type == "isc_ssd":
         dm_restock.notes_tab.setAdditionalComments(__CANNED_RESPONSES['repair_isc_ssd'])
         dm_restock.variables_tab.select_complete_at("isc")
+        #Go to RITM page
+        ServiceNow.search(ritm)
+        #Find and go to open repair task
+        #Complete repair
 
     elif repair_type == "mdc":
         dm_restock.notes_tab.setAdditionalComments((__CANNED_RESPONSES['mdc']))
@@ -373,7 +388,7 @@ def doRepair(hostname, repair_type):
     #time.sleep(3)
     dm_restock.details_tab.accept_actual_start()
     #time.sleep(3)
-    ritm = dm_restock.get_ritm()
+
     raise NotImplementedError
     #dm_restock.submit()
 
@@ -390,7 +405,7 @@ for item in computers:
     hostname = item[0]
     task = item[1]
 
-    ServiceNow.tickets_assigned_to_tim()
+    ServiceNow.tims_queue()
 
     if SAVE_TICKET == False:
         ServiceNow.waitForAlert()
