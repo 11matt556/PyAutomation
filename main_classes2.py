@@ -308,8 +308,8 @@ class Table:
             if self.get_col_name(i).lower() == name.lower():
                 return i
 
-# Returns the row and col position of cell, not the cell itself!
-    def get_cell_pos_by_col(self, colName, cellName) -> list:
+# Returns row of cell, not the cell itself!
+    def find_cell_in_col(self, colName, cellName) -> list:
         for row in range(self.get_body_row_len()):
             col = self.get_col_by_name(colName)
             cell = self.get_body_cell(row, col)
@@ -317,8 +317,7 @@ class Table:
 
             if str(cell.text).lower() == cellName.lower():
                 print("FOUND CELL!")
-                #print(cell)
-                return [row, col]
+                return row
 
 
 def doDecom(hostname):
@@ -360,7 +359,7 @@ def doRestock(hostname):
 
     CSV.appendToCSV(['', '', hostname, dm_restock.get_ritm(), "restock"], 'output.csv')
 
-# repar_type can be "isc_ssd", or "mdc"
+# repar_type can be "isc", or "mdc"
 def doRepair(hostname, repair_type):
     print("REPAIRING " + hostname)
     dm_restock = DmRestock()
@@ -371,12 +370,21 @@ def doRepair(hostname, repair_type):
     dm_restock.details_tab.get_actual_start_button().click()
 
     ritm = dm_restock.get_ritm()
-    if repair_type == "isc_ssd":
+    if repair_type == "isc":
         dm_restock.notes_tab.setAdditionalComments(__CANNED_RESPONSES['repair_isc_ssd'])
         dm_restock.variables_tab.select_complete_at("isc")
         #Go to RITM page
         ServiceNow.search(ritm)
         #Find and go to open repair task
+        table = Table("sc_req_item.sc_task.request_item_table")
+        state_col = table.get_col_by_name("State")
+        task_col = table.get_col_by_name("Number")
+        desc_col = table.get_col_by_name("Short description")
+
+        cell_row = table.find_cell_in_col("state", "open")
+
+        table.get_body_cell(cell[0],task_col).click()
+
         #Complete repair
 
     elif repair_type == "mdc":
@@ -411,9 +419,9 @@ for item in computers:
         ServiceNow.waitForAlert()
 
     tims_table = Table("task_table")
-    item_pos = tims_table.get_cell_pos_by_col("Configuration item", hostname)
+    item_row = tims_table.find_cell_in_col("Configuration item", hostname)
     taskCol = tims_table.get_col_by_name("number")
-    tims_table.get_body_cell(item_pos[0], taskCol).click()
+    tims_table.get_body_cell(item_row, taskCol).click()
 
     try:
         if task == "Decommission":
@@ -423,12 +431,3 @@ for item in computers:
     except Exception as e:
         print(hostname+": "+ "Something went wrong!")
         traceback.print_tb(e.__traceback__)
-
-
-
-
-
-
-#driver.get("https://prismahealth.service-now.com/nav_to.do?uri=%2Fsc_task.do%3Fsys_id%3Df59190fc1bc48410f15a4005bd4bcb9b%26sysparm_view%3Dtext_search")
-#task = CatalogTask()
-#print(str(task.get_state()))
