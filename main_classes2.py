@@ -264,24 +264,11 @@ class Table:
         self.rows_body = self.table_body.find_elements_by_tag_name("tr")
         self.rows_head = self.table_head.find_elements_by_tag_name("tr")
 
-    def get_body_row_len(self):
-        return len(self.rows_body)
-
     def get_header_row_len(self):
         return len(self.rows_head)
 
-    def get_body_col_len(self):
-        return len(self.rows_body[0].find_elements_by_tag_name('td')) - 1
-
     def get_header_col_len(self):
         return len(self.rows_head[0].find_elements_by_tag_name('th')) - 1
-
-    def get_body_row(self, r):
-        row_items = self.rows_body[r].find_elements_by_tag_name("td")
-        #print("Getting row " + str(r))
-        #for item in row_items:
-            #print(item.text)
-        return row_items
 
     def get_header_row(self, r):
         row_items = self.rows_head[r].find_elements_by_tag_name("th")
@@ -290,14 +277,27 @@ class Table:
             #print(item.get_attribute("glide_label"))
         return row_items
 
-    def get_body_cell(self, r, c):
-        cell = self.get_body_row(r)[c]
-        #print("row:" + str(r) + " col:" + str(c) + " is " + cell.text)
-        return cell
-
     def get_header_cell(self, r, c):
         cell = self.get_header_row(r)[c]
         #print("row:" + str(r) + " col:" + str(c) + " is " + cell.get_attribute("glide_label"))
+        return cell
+
+    def get_body_row_len(self):
+        return len(self.rows_body)
+
+    def get_body_col_len(self):
+        return len(self.rows_body[0].find_elements_by_tag_name('td')) - 1
+
+    def get_body_row(self, r):
+        row_items = self.rows_body[r].find_elements_by_tag_name("td")
+        #print("Getting row " + str(r))
+        #for item in row_items:
+            #print(item.text)
+        return row_items
+
+    def get_body_cell(self, r, c):
+        cell = self.get_body_row(r)[c]
+        #print("row:" + str(r) + " col:" + str(c) + " is " + cell.text)
         return cell
 
     def get_col_name(self, c) -> str:
