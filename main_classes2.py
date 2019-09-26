@@ -77,6 +77,14 @@ class CatalogTask:
     details_tab = None
     variables_tab = None
 
+    affected_ci = None
+    support_ola = None
+    customer_sla = None
+    all_attachments = None
+    additional_catalog_tasks = None
+    mce_students = None
+    external_users = None
+
     def __init__(self):
         switchToDefaultFrame()
         switchToContentFrame()
@@ -87,7 +95,7 @@ class CatalogTask:
         self.shortDescription = driver.find_element_by_id("sc_task.short_description").get_attribute("value")
         self.state = select.Select(driver.find_element_by_id('sc_task.state'))
         self.assignedTo = driver.find_element_by_id('sys_display.sc_task.assigned_to').get_attribute("value")
-
+        self.additional_catalog_tasks = Table()
     def get_state(self):
         return self.state
 
@@ -198,7 +206,7 @@ class RestockVar:
 class DmRestock(CatalogTask):
     def __init__(self):
         CatalogTask.__init__(self)
-        self.variablesTab = RestockVar()
+        self.variables_tab = RestockVar()
 
 
 class ServiceNow:
@@ -312,7 +320,7 @@ def doDecom(hostname):
 
     dm_restock.set_state(__VALID_STATES['cc'])
     dm_restock.notes_tab.setAdditionalComments(__CANNED_RESPONSES['decommission'])
-    dm_restock.variablesTab.select_restock_decom_repair("decommission")
+    dm_restock.variables_tab.select_restock_decom_repair("decommission")
     ritm = dm_restock.get_ritm()
     dm_restock.details_tab.get_actual_start_button().click()
     #time.sleep(3)
@@ -332,7 +340,7 @@ def doRestock(hostname):
 
     dm_restock.set_state(__VALID_STATES['cc'])
     dm_restock.notes_tab.setAdditionalComments(__CANNED_RESPONSES['restock'])
-    dm_restock.variablesTab.select_restock_decom_repair("restock")
+    dm_restock.variables_tab.select_restock_decom_repair("restock")
     ritm = dm_restock.get_ritm()
     dm_restock.details_tab.get_actual_start_button().click()
     #time.sleep(3)
@@ -341,6 +349,33 @@ def doRestock(hostname):
     dm_restock.submit()
 
     CSV.appendToCSV(['', '', hostname, dm_restock.get_ritm(), "restock"], 'output.csv')
+
+# repar_type can be "isc_ssd", or "mdc"
+def doRepair(hostname, repair_type):
+    print("REPAIRING " + hostname)
+    dm_restock = DmRestock()
+
+    dm_restock.set_state(__VALID_STATES['cc'])
+
+    dm_restock.variables_tab.select_restock_decom_repair("repair")
+    dm_restock.details_tab.get_actual_start_button().click()
+
+    if repair_type == "isc_ssd":
+        dm_restock.notes_tab.setAdditionalComments(__CANNED_RESPONSES['repair_isc_ssd'])
+        dm_restock.variables_tab.select_complete_at("isc")
+
+    elif repair_type == "mdc":
+        dm_restock.notes_tab.setAdditionalComments((__CANNED_RESPONSES['mdc']))
+        dm_restock.variables_tab.select_complete_at("mdc")
+
+
+
+    #time.sleep(3)
+    dm_restock.details_tab.accept_actual_start()
+    #time.sleep(3)
+    ritm = dm_restock.get_ritm()
+    raise NotImplementedError
+    #dm_restock.submit()
 
 computers = CSV.import_csv('input.csv')
 
