@@ -27,10 +27,11 @@ __VALID_STATES = {
     "cc": "Closed Complete"
 }
 
+REVIEW_REQUIRED = []
+VERBOSE_LOG = True
 SAVE_TICKET = True
 
 driver = webdriver.Chrome()
-
 driver.implicitly_wait(1)
 
 
@@ -152,6 +153,7 @@ class Details:
 
     def set_actual_start(self):
         self.get_actual_start_button().click()
+        time.sleep(5)
         self.accept_actual_start()
 
 
@@ -415,6 +417,12 @@ def doRepair(configuration_item, repair_type):  # repair_type can be "isc", or "
 
     CSV.appendToCSV(['', '', configuration_item, ritm, "restock"], 'output.csv')
 
+def write_review():
+    CSV.clearCSV('review.csv')
+    print("THE FOLLOWING ITEMS REQUIRE MANUAL REVIEW! A copy has been saved to review.csv")
+    for x in range(len(REVIEW_REQUIRED)):
+        print("\t"+str(REVIEW_REQUIRED[x]))
+        CSV.appendToCSV(REVIEW_REQUIRED[x], 'review.csv')
 
 computers = CSV.import_csv('input.csv')
 
@@ -428,20 +436,27 @@ CSV.clearCSV('output.csv')
 CSV.appendToCSV(['Tech Name', 'SN', 'PC Name', 'RITM', 'Restock/Repair', 'Label Notes'], 'output.csv')
 
 for item in computers:
-    hostname = item[0]
-    task = str(item[1]).lower()
-    print("====================" + hostname + " (" + task + ")" + "====================")
 
     ServiceNow.tims_queue()
 
     if not SAVE_TICKET:
         ServiceNow.acceptAlert()
 
-    # TODO: Handle case where computer is not found
-    tims_table = Table("task_table")
-    item_row = tims_table.find_in_col(hostname, "Configuration item")
-    taskCol = tims_table.find_col_with_name("number")
-    tims_table.get_body_cell(item_row, taskCol).click()
+    try:
+        hostname = item[0]
+        task = str(item[1]).lower()
+
+        print("====================" + hostname + " (" + task + ")" + "====================")
+        tims_table = Table("task_table")
+        item_row = tims_table.find_in_col(hostname, "Configuration item") # Find which row the hostname is in
+        taskCol = tims_table.find_col_with_name("number")  # Get the index of the task "number" column
+        tims_table.get_body_cell(item_row,  tims_table.find_col_with_name("number")).click()
+
+    except Exception as e:
+        print("Error locating item: " + hostname + " Skipping to next item")
+        REVIEW_REQUIRED.append([hostname, traceback.format_exc()])
+        write_review()
+        continue
 
     try:
         if task == "decommission":
@@ -457,5 +472,11 @@ for item in computers:
             doRepair(hostname, "mdc")
 
     except Exception as e:
-        print(hostname + ": " + "Something went wrong!")
-        traceback.print_tb(e.__traceback__)
+        print("Error in item: " + hostname)
+        print("\t"+repr(e))
+        REVIEW_REQUIRED.append([hostname, traceback.format_exc()])
+
+        if VERBOSE_LOG:
+            traceback.print_tb(e.__traceback__)
+
+        write_review()

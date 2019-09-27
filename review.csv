@@ -1,0 +1,25 @@
+fake,"Traceback (most recent call last):
+  File ""C:/Users/mrh19a/Documents/Scripts/PyAutomation/main_classes2.py"", line 447, in <module>
+    task = str(item[1]).lower()
+IndexError: list index out of range
+"
+fake,"Traceback (most recent call last):
+  File ""C:/Users/mrh19a/Documents/Scripts/PyAutomation/main_classes2.py"", line 447, in <module>
+    task = str(item[1]).lower()
+IndexError: list index out of range
+"
+fake,"Traceback (most recent call last):
+  File ""C:/Users/mrh19a/Documents/Scripts/PyAutomation/main_classes2.py"", line 447, in <module>
+    task = str(item[1]).lower()
+IndexError: list index out of range
+"
+fake,"Traceback (most recent call last):
+  File ""C:/Users/mrh19a/Documents/Scripts/PyAutomation/main_classes2.py"", line 447, in <module>
+    task = str(item[1]).lower()
+IndexError: list index out of range
+"
+fake,"Traceback (most recent call last):
+  File ""C:/Users/mrh19a/Documents/Scripts/PyAutomation/main_classes2.py"", line 447, in <module>
+    task = str(item[1]).lower()
+IndexError: list index out of range
+"
