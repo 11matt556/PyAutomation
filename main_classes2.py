@@ -14,12 +14,12 @@ import time
 import csv
 
 __CANNED_RESPONSES = {
-    "acknowledge":      "Acknowledging asset/ticket",
-    "restock":          "Device to be restocked, W10 Rollout; Device has been tested and wiped",
-    "reclaim":          "Device has been reclaimed; Device to be restocked after testing & cleaning.",
-    "decommission":     "This device is being decommissioned; send to MDC",
-    "repair_mdc":       "Device to be sent in for repair/stock at MDC",
-    "repair_isc_ssd":   "USDT device to be repaired with SSD swapout"
+    "acknowledge": "Acknowledging asset/ticket",
+    "restock": "Device to be restocked, W10 Rollout; Device has been tested and wiped",
+    "reclaim": "Device has been reclaimed; Device to be restocked after testing & cleaning.",
+    "decommission": "This device is being decommissioned; send to MDC",
+    "repair_mdc": "Device to be sent in for repair/stock at MDC",
+    "repair_isc_ssd": "USDT device to be repaired with SSD swapout"
 }
 
 __VALID_STATES = {
@@ -66,11 +66,11 @@ class CSV:
             writer.writerow(row)
         writeFile.close()
 
-
     @staticmethod
     def clearCSV(csvFile):
         writeFile = open(csvFile, "w+")
         writeFile.close()
+
 
 class CatalogTask:
     notes_tab = None
@@ -107,7 +107,8 @@ class CatalogTask:
         driver.find_element_by_id('sc_task.state').find_element_by_xpath("//option[. = '" + state + "']").click()
         self.state = state
 
-    def submit(self):
+    @staticmethod
+    def submit():
         actions = webdriver.ActionChains(driver)
 
         saveMenu = driver.find_element_by_xpath("//nav/div")
@@ -145,12 +146,19 @@ class Details:
     def get_actual_start_button(self):
         return self.actual_start_button
 
-    def accept_actual_start(self):
+    @staticmethod
+    def accept_actual_start():
         driver.find_element_by_xpath("//button[@id='GwtDateTimePicker_ok']").click()
+
+    def set_actual_start(self):
+        self.get_actual_start_button().click()
+        self.accept_actual_start()
+
 
 class Notes:
 
-    def setAdditionalComments(self, commentString):
+    @staticmethod
+    def setAdditionalComments(commentString):
         print("Typing " + str(commentString))
         commentArea = driver.find_element_by_xpath("//textarea[@id='activity-stream-comments-textarea']")
         # Sometimes the comment box area is collapsed by default, so we must click the button to expand it first
@@ -160,14 +168,16 @@ class Notes:
             driver.find_element_by_xpath("//span[2]/span/nav/div/div[2]/span/button").click()
             commentArea.send_keys(commentString)
 
-#For Catalog Tasks of type dm_repair
-class RepairVar:
+
+class RepairVar:  # Variable tab for dm_repair tickets
     def __init__(self):
         try:
-            self.repair_type = select.Select(driver.find_element_by_xpath("//div[2]/table/tbody/tr[2]/td/div/div/div/div[2]/select"))
+            self.repair_type = select.Select(
+                driver.find_element_by_xpath("//div[2]/table/tbody/tr[2]/td/div/div/div/div[2]/select"))
         except seleniumExceptions.ElementNotInteractableException:
             driver.find_element_by_xpath("//span[3]/span/nav/div/div[2]/span/button").click()
-            self.repair_type = select.Select(driver.find_element_by_xpath("//div[2]/table/tbody/tr[2]/td/div/div/div/div[2]/select"))
+            self.repair_type = select.Select(
+                driver.find_element_by_xpath("//div[2]/table/tbody/tr[2]/td/div/div/div/div[2]/select"))
 
     def select_repair_type(self, repair_type: str):
         if repair_type.lower() == 'restock':
@@ -187,8 +197,8 @@ class DmRestock(CatalogTask):
         CatalogTask.__init__(self)
         self.variables_tab = RestockVar()
 
-#For Catalog Tasks of type dm_restock
-class RestockVar:
+
+class RestockVar:  # Variable tab for dm_restock tickets
     action_required = None
     field_tech = None
     assigned_group = None
@@ -200,35 +210,41 @@ class RestockVar:
 
     def __init__(self):
         try:
-            self.restock_decom_repair = select.Select(driver.find_element_by_xpath("//tr[5]/td/div/div/div/div[2]/select"))
+            self.restock_decom_repair = select.Select(
+                driver.find_element_by_xpath("//tr[5]/td/div/div/div/div[2]/select"))
         # If we can't get the menu, try expanding the parent menu out
         except seleniumExceptions.ElementNotInteractableException:
             driver.find_element_by_xpath("//span[3]/span/nav/div/div[2]/span/button").click()
-            self.restock_decom_repair = select.Select(driver.find_element_by_xpath("//tr[5]/td/div/div/div/div[2]/select"))
+            self.restock_decom_repair = select.Select(
+                driver.find_element_by_xpath("//tr[5]/td/div/div/div/div[2]/select"))
 
-    #Valid values are "Restock" "Repair" and "Decommission"
-    def select_restock_decom_repair(self, value):
-            self.restock_decom_repair.select_by_value(value)
+    def select_restock_decom_repair(self, value):  # Valid values are "Restock" "Repair" and "Decommission"
+        print("Selecting " + value)
+        self.restock_decom_repair.select_by_value(value)
 
-    def select_complete_at(self, value):
+    @staticmethod
+    def select_complete_at(value):
         dropdown = select.Select(driver.find_element_by_xpath("//tr[6]/td/div/div/div/div[2]/select"))
+        print("Repair to be completed at " + value)
         if value.lower() == "isc":
             dropdown.select_by_value("Yes")
         elif value.lower() == "mdc":
             dropdown.select_by_value("No")
-
-
-
+        else:
+            print(value + " is not a valid repair completion location")
+            raise Exception
 
 
 class ServiceNow:
     @staticmethod
     def tims_queue():
-        driver.get("https://prismahealth.service-now.com/nav_to.do?uri=%2Ftask_list.do%3Fsysparm_fixed_query%3D%26sysparm_query%3Dactive%253Dtrue%255Eassigned_to%253D78ae421e1b4fb700f15a4005bd4bcb8d%26sysparm_clear_stack%3Dtrue")
+        driver.get(
+            "https://prismahealth.service-now.com/nav_to.do?uri=%2Ftask_list.do%3Fsysparm_fixed_query%3D%26sysparm_query%3Dactive%253Dtrue%255Eassigned_to%253D78ae421e1b4fb700f15a4005bd4bcb8d%26sysparm_clear_stack%3Dtrue")
 
     @staticmethod
     def device_management():
-        driver.get("https://prismahealth.service-now.com/nav_to.do?uri=%2Fcom.glideapp.servicecatalog_cat_item_view.do%3Fv%3D1%26sysparm_id%3D9b8d095f4f9e7b0416d5334d0210c7b4%26sysparm_link_parent%3D7edd9ad21b9f734033eb85507e4bcb98%26sysparm_catalog%3D816d92d21b9f734033eb85507e4bcbf6%26sysparm_catalog_view%3Dcatalog_desktop_support")
+        driver.get(
+            "https://prismahealth.service-now.com/nav_to.do?uri=%2Fcom.glideapp.servicecatalog_cat_item_view.do%3Fv%3D1%26sysparm_id%3D9b8d095f4f9e7b0416d5334d0210c7b4%26sysparm_link_parent%3D7edd9ad21b9f734033eb85507e4bcb98%26sysparm_catalog%3D816d92d21b9f734033eb85507e4bcbf6%26sysparm_catalog_view%3Dcatalog_desktop_support")
 
     @staticmethod
     def homepage():
@@ -256,10 +272,11 @@ class ServiceNow:
         searchbox.click()
         searchbox.send_keys(inputString)
         searchbox.send_keys(Keys.RETURN)
-        if SAVE_TICKET == False:
+        if not SAVE_TICKET:
             ServiceNow.acceptAlert()
         switchToDefaultFrame()
         switchToContentFrame()
+
 
 class Table:
     table = None
@@ -280,22 +297,18 @@ class Table:
         self.rows_head = self.table_head.find_elements_by_tag_name("tr")
         print("Table loaded")
 
-    def get_header_row_len(self):
+    def get_header_row_len(self):  # Return the number of rows in the header. This should almost always be 1.
         return len(self.rows_head)
 
-    def get_header_col_len(self):
+    def get_header_col_len(self):  # Return the number of columns in the header.
         return len(self.rows_head[0].find_elements_by_tag_name('th')) - 1
 
-    def get_header_row(self, r):
+    def get_header_row(self, r):  # Return the row as a list of Selenium Web Element
         row_items = self.rows_head[r].find_elements_by_tag_name("th")
-        #print("Getting row " + str(r))
-        #for item in row_items:
-            #print(item.get_attribute("glide_label"))
         return row_items
 
-    def get_header_cell(self, r, c):
+    def get_header_cell(self, r, c):  # Returns a single Selenium Web Element from the table
         cell = self.get_header_row(r)[c]
-        #print("row:" + str(r) + " col:" + str(c) + " is " + cell.get_attribute("glide_label"))
         return cell
 
     def get_body_row_len(self):
@@ -306,127 +319,101 @@ class Table:
 
     def get_body_row(self, r):
         row_items = self.rows_body[r].find_elements_by_tag_name("td")
-        #print("Getting row " + str(r))
-        #for item in row_items:
-            #print(item.text)
         return row_items
 
     def get_body_cell(self, r, c):
         cell = self.get_body_row(r)[c]
-        #print("row:" + str(r) + " col:" + str(c) + " is " + cell.text)
         return cell
 
-    def get_col_name(self, c) -> str:
+    def get_col_name(self, c) -> str:  # Return the name of a column when given the index
         return str(self.get_header_cell(0, c).get_attribute("glide_label"))
 
-    def find_col_with_name(self, name) -> int:
+    def find_col_with_name(self, name) -> int:  # Return the index of a column when given the name of the column
         for i in range(self.get_header_col_len()):
             if self.get_col_name(i).lower() == name.lower():
                 return i
 
-    # Returns row of cell, not the cell itself!
-    def find_in_col(self, cellName, colName) -> list:
-        print("----Looking for "+ cellName + " in " + colName + "----")
-        for row in range(self.get_body_row_len()):
+    # Returns row index of cell, not the cell itself!
+    def find_in_col(self, cellName,
+                    colName) -> int:  # Search in coName for a cell named cellName and return the row index
+        print("----Looking for " + cellName + " in " + colName + "----")
+        for row_index in range(self.get_body_row_len()):
             col = self.find_col_with_name(colName)
-            cell = self.get_body_cell(row, col)
-            print(str(row) + "," +str(col) + " " + cell.text + "\r", end=" ", flush=True)
+            cell = self.get_body_cell(row_index, col)
+            print(str(row_index) + "," + str(col) + " " + cell.text + "\r", end=" ", flush=True)
 
             if str(cell.text).lower() == cellName.lower():
-                print("FOUND " + str(cellName) + " in row " + str(row))
-                return row
+                print("FOUND " + str(cellName) + " in row_index " + str(row_index))
+                return row_index
 
 
-def doDecom(hostname):
-    print("DECOMMISSIONING " + hostname)
+def doDecom(configuration_item):
+    print("DECOMMISSIONING " + configuration_item)
     dm_restock = DmRestock()
-    #dm_restock.set_state(__VALID_STATES['wip'])
-    #dm_restock.notes_tab.setAdditionalComments(__CANNED_RESPONSES["acknowledge"])
-    #dm_restock.submit()
-
+    ritm = dm_restock.get_ritm()
     dm_restock.set_state(__VALID_STATES['cc'])
     dm_restock.notes_tab.setAdditionalComments(__CANNED_RESPONSES['decommission'])
     dm_restock.variables_tab.select_restock_decom_repair("decommission")
-    ritm = dm_restock.get_ritm()
-    dm_restock.details_tab.get_actual_start_button().click()
-    #time.sleep(3)
-    dm_restock.details_tab.accept_actual_start()
-    #time.sleep(3)
+    dm_restock.details_tab.set_actual_start()
     dm_restock.submit()
 
-    CSV.appendToCSV(['', '', hostname, dm_restock.get_ritm(), "Decommission"], 'output.csv')
+    CSV.appendToCSV(['', '', configuration_item, ritm, "Decommission"], 'output.csv')
 
 
-def doRestock(hostname):
-    print("RESTOCKING " + hostname)
+def doRestock(configuration_item):
+    print("RESTOCKING " + configuration_item)
     dm_restock = DmRestock()
-    #dm_restock.set_state(__VALID_STATES['wip'])
-    #dm_restock.notes_tab.setAdditionalComments(__CANNED_RESPONSES["acknowledge"])
-    #dm_restock.submit()
-
+    ritm = dm_restock.get_ritm()
     dm_restock.set_state(__VALID_STATES['cc'])
     dm_restock.notes_tab.setAdditionalComments(__CANNED_RESPONSES['restock'])
     dm_restock.variables_tab.select_restock_decom_repair("restock")
-    ritm = dm_restock.get_ritm()
-    dm_restock.details_tab.get_actual_start_button().click()
-    #time.sleep(3)
-    dm_restock.details_tab.accept_actual_start()
-    #time.sleep(3)
+    dm_restock.details_tab.set_actual_start()
     dm_restock.submit()
 
-    CSV.appendToCSV(['', '', hostname, dm_restock.get_ritm(), "restock"], 'output.csv')
+    CSV.appendToCSV(['', '', configuration_item, ritm, "restock"], 'output.csv')
 
-# repair_type can be "isc", or "mdc"
-def doRepair(hostname, repair_type):
-    print("REPAIRING " + hostname)
+
+def doRepair(configuration_item, repair_type):  # repair_type can be "isc", or "mdc"
+    print("REPAIRING " + configuration_item)
     dm_restock = DmRestock()
+    ritm = dm_restock.get_ritm()  # Grab the ritm since we will need this later
+    dm_restock.set_state(__VALID_STATES['cc'])  # Set ticket state to Closed Complete
+    dm_restock.variables_tab.select_restock_decom_repair(
+        "repair")  # Select 'Repair' from the REpair/Restock/Decom dropdown
+    dm_restock.details_tab.set_actual_start()  # Set the actual start date to the current time
 
-    dm_restock.set_state(__VALID_STATES['cc'])
-
-    dm_restock.variables_tab.select_restock_decom_repair("repair")
-    dm_restock.details_tab.get_actual_start_button().click()
-    dm_restock.details_tab.accept_actual_start()
-
-    ritm = dm_restock.get_ritm()
     if repair_type == "isc":
-        dm_restock.notes_tab.setAdditionalComments(__CANNED_RESPONSES['repair_isc_ssd'])
-        dm_restock.variables_tab.select_complete_at("isc")
-        dm_restock.submit()
+        dm_restock.notes_tab.setAdditionalComments(__CANNED_RESPONSES['repair_isc_ssd'])  # Set the comment
+        dm_restock.variables_tab.select_complete_at("isc")  # Select that the ticket will be completed at isc
+        dm_restock.submit()  # Submit the ticket
 
-        #time.sleep(8)
+        # Now we need to locate the dm_repair task to complete the repair.
 
-        # Go to RITM page
-        ServiceNow.search(ritm)
+        ServiceNow.search(ritm)  # Go to the RITM page.
 
-        # Find and go to open repair task
-        table = Table("sc_req_item.sc_task.request_item_table")
+        table = Table("sc_req_item.sc_task.request_item_table")  # Load table of catalog tasks associated with this RITM
         state_col = table.find_col_with_name("State")
         task_col = table.find_col_with_name("Number")
         desc_col = table.find_col_with_name("Short description")
 
-        cell_row = table.find_in_col("open", "state")
+        cell_row = table.find_in_col("open", "state")  # Find open ticket
+        # TODO: Perform additional validation that this is the correct ticket
+        table.get_body_cell(cell_row, task_col).click()  # Click on the open ticket
 
-        table.get_body_cell(cell_row,task_col).click()
-
-        # Complete repair
+        # Now we are on the dm_repair ticket page
         dm_repair = DmRepair()
         dm_repair.set_state(__VALID_STATES['cc'])
-
-        dm_repair.details_tab.get_actual_start_button().click()
-        dm_repair.details_tab.accept_actual_start()
-
+        dm_repair.details_tab.set_actual_start()
         dm_repair.notes_tab.setAdditionalComments(__CANNED_RESPONSES['repair_isc_ssd'])
         dm_repair.variables_tab.select_repair_type('restock')
-
-        dm_restock.submit()
-
+        dm_repair.submit()
 
     elif repair_type == "mdc":
         dm_restock.notes_tab.setAdditionalComments((__CANNED_RESPONSES['mdc']))
         dm_restock.variables_tab.select_complete_at("mdc")
         dm_restock.submit()
 
-    CSV.appendToCSV(['', '', hostname, ritm, "restock"], 'output.csv')
+    CSV.appendToCSV(['', '', configuration_item, ritm, "restock"], 'output.csv')
 
 
 computers = CSV.import_csv('input.csv')
@@ -435,7 +422,7 @@ computers = CSV.import_csv('input.csv')
 
 ServiceNow.homepage()
 
-#Login
+# Login
 driver.find_element_by_xpath("//*[@id='maincontent']/tbody/tr[4]/td[2]").click()
 CSV.clearCSV('output.csv')
 CSV.appendToCSV(['Tech Name', 'SN', 'PC Name', 'RITM', 'Restock/Repair', 'Label Notes'], 'output.csv')
@@ -447,7 +434,7 @@ for item in computers:
 
     ServiceNow.tims_queue()
 
-    if SAVE_TICKET == False:
+    if not SAVE_TICKET:
         ServiceNow.acceptAlert()
 
     # TODO: Handle case where computer is not found
@@ -464,11 +451,11 @@ for item in computers:
             doRestock(hostname)
 
         elif task == "repair_isc":
-            doRepair(hostname,"isc")
+            doRepair(hostname, "isc")
 
         elif task == "repair_mdc":
-            doRepair(hostname,"mdc")
+            doRepair(hostname, "mdc")
 
     except Exception as e:
-            print(hostname+": "+ "Something went wrong!")
-            traceback.print_tb(e.__traceback__)
+        print(hostname + ": " + "Something went wrong!")
+        traceback.print_tb(e.__traceback__)
