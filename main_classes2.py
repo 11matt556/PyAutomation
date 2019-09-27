@@ -449,6 +449,7 @@ for item in computers:
     if SAVE_TICKET == False:
         ServiceNow.acceptAlert()
 
+    # TODO: Handle case where computer is not found
     tims_table = Table("task_table")
     item_row = tims_table.find_in_col(hostname, "Configuration item")
     taskCol = tims_table.find_col_with_name("number")
