@@ -426,6 +426,7 @@ def doRepair(hostname, repair_type):
         dm_restock.variables_tab.select_complete_at("mdc")
         dm_restock.submit()
 
+    CSV.appendToCSV(['', '', hostname, ritm, "restock"], 'output.csv')
 
 
 computers = CSV.import_csv('input.csv')
