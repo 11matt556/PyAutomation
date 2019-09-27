@@ -95,7 +95,7 @@ class CatalogTask:
         self.shortDescription = driver.find_element_by_id("sc_task.short_description").get_attribute("value")
         self.state = select.Select(driver.find_element_by_id('sc_task.state'))
         self.assignedTo = driver.find_element_by_id('sys_display.sc_task.assigned_to').get_attribute("value")
-        self.additional_catalog_tasks = Table()
+
     def get_state(self):
         return self.state
 
@@ -162,12 +162,30 @@ class Notes:
 
 #For Catalog Tasks of type dm_repair
 class RepairVar:
-    pass
+    def __init__(self):
+        try:
+            self.repair_type = select.Select(driver.find_element_by_xpath("//div[2]/table/tbody/tr[2]/td/div/div/div/div[2]/select"))
+        except seleniumExceptions.ElementNotInteractableException:
+            driver.find_element_by_xpath("//span[3]/span/nav/div/div[2]/span/button").click()
+            self.repair_type = select.Select(driver.find_element_by_xpath("//div[2]/table/tbody/tr[2]/td/div/div/div/div[2]/select"))
+
+    def select_repair_type(self, repair_type: str):
+        if repair_type.lower() == 'restock':
+            self.repair_type.select_by_value('restock')
+        else:
+            print(repair_type + " is not a valid option")
+
 
 class DmRepair(CatalogTask):
-    #Stuff for repair
-    pass
+    def __init__(self):
+        CatalogTask.__init__(self)
+        self.variables_tab = RepairVar()
 
+
+class DmRestock(CatalogTask):
+    def __init__(self):
+        CatalogTask.__init__(self)
+        self.variables_tab = RestockVar()
 
 #For Catalog Tasks of type dm_restock
 class RestockVar:
@@ -179,10 +197,9 @@ class RestockVar:
     computer_name = None
     asset_tag = None
     restock_decom_repair = None
-    complete_at = None #ISC or MDC
 
     def __init__(self):
-        try: #Try to get the action selection menu
+        try:
             self.restock_decom_repair = select.Select(driver.find_element_by_xpath("//tr[5]/td/div/div/div/div[2]/select"))
         # If we can't get the menu, try expanding the parent menu out
         except seleniumExceptions.ElementNotInteractableException:
@@ -193,20 +210,15 @@ class RestockVar:
     def select_restock_decom_repair(self, value):
             self.restock_decom_repair.select_by_value(value)
 
-
     def select_complete_at(self, value):
-        dropdown = select.Select(driver.find_element_by_xpath("//tr[3]/td/div/div/div/div[2]/select"))
-
-        if value == "ISC":
-           dropdown.select_by_value("Yes")
-        elif value == "MDC":
+        dropdown = select.Select(driver.find_element_by_xpath("//tr[6]/td/div/div/div/div[2]/select"))
+        if value.lower() == "isc":
+            dropdown.select_by_value("Yes")
+        elif value.lower() == "mdc":
             dropdown.select_by_value("No")
 
 
-class DmRestock(CatalogTask):
-    def __init__(self):
-        CatalogTask.__init__(self)
-        self.variables_tab = RestockVar()
+
 
 
 class ServiceNow:
@@ -223,7 +235,7 @@ class ServiceNow:
         driver.get("https://prismahealth.service-now.com")
 
     @staticmethod
-    def waitForAlert():
+    def acceptAlert():
         try:
             WebDriverWait(driver, 1).until(EC.alert_is_present(), 'Timed out waiting for confirmation popup to appear.')
             alertObj = driver.switch_to.alert
@@ -237,11 +249,15 @@ class ServiceNow:
     def search(inputString):
         switchToDefaultFrame()
         print("Searching for " + inputString)
-        searchbox = driver.find_element_by_xpath("//*[@id='sysparm_search']")
+        searchbutton = driver.find_element_by_xpath("//label/span")
+        searchbutton.click()
+        searchbox = driver.find_element_by_xpath("//form/div/input")
         searchbox.clear()
         searchbox.click()
         searchbox.send_keys(inputString)
         searchbox.send_keys(Keys.RETURN)
+        if SAVE_TICKET == False:
+            ServiceNow.acceptAlert()
         switchToDefaultFrame()
         switchToContentFrame()
 
@@ -314,13 +330,11 @@ class Table:
         for row in range(self.get_body_row_len()):
             col = self.find_col_with_name(colName)
             cell = self.get_body_cell(row, col)
-            #print(str(row) + "," +str(col) + " " + cell.text)
+            print(str(row) + "," +str(col) + " " + cell.text + "\r", end=" ", flush=True)
 
             if str(cell.text).lower() == cellName.lower():
-                print("FOUND " + cellName + " in row " + row)
+                print("FOUND " + str(cellName) + " in row " + str(row))
                 return row
-            else:
-                print("Unable to find " + cellName)
 
 
 def doDecom(hostname):
@@ -371,11 +385,15 @@ def doRepair(hostname, repair_type):
 
     dm_restock.variables_tab.select_restock_decom_repair("repair")
     dm_restock.details_tab.get_actual_start_button().click()
+    dm_restock.details_tab.accept_actual_start()
 
     ritm = dm_restock.get_ritm()
     if repair_type == "isc":
         dm_restock.notes_tab.setAdditionalComments(__CANNED_RESPONSES['repair_isc_ssd'])
         dm_restock.variables_tab.select_complete_at("isc")
+        dm_restock.submit()
+
+        #time.sleep(8)
 
         # Go to RITM page
         ServiceNow.search(ritm)
@@ -389,22 +407,26 @@ def doRepair(hostname, repair_type):
         cell_row = table.find_in_col("open", "state")
 
         table.get_body_cell(cell_row,task_col).click()
-        raise NotImplementedError
 
         # Complete repair
+        dm_repair = DmRepair()
+        dm_repair.set_state(__VALID_STATES['cc'])
+
+        dm_repair.details_tab.get_actual_start_button().click()
+        dm_repair.details_tab.accept_actual_start()
+
+        dm_repair.notes_tab.setAdditionalComments(__CANNED_RESPONSES['repair_isc_ssd'])
+        dm_repair.variables_tab.select_repair_type('restock')
+
+        dm_restock.submit()
+
 
     elif repair_type == "mdc":
         dm_restock.notes_tab.setAdditionalComments((__CANNED_RESPONSES['mdc']))
         dm_restock.variables_tab.select_complete_at("mdc")
+        dm_restock.submit()
 
 
-
-    #time.sleep(3)
-    dm_restock.details_tab.accept_actual_start()
-    #time.sleep(3)
-
-
-    #dm_restock.submit()
 
 computers = CSV.import_csv('input.csv')
 
@@ -425,7 +447,7 @@ for item in computers:
     ServiceNow.tims_queue()
 
     if SAVE_TICKET == False:
-        ServiceNow.waitForAlert()
+        ServiceNow.acceptAlert()
 
     tims_table = Table("task_table")
     item_row = tims_table.find_in_col(hostname, "Configuration item")
@@ -435,8 +457,16 @@ for item in computers:
     try:
         if task == "decommission":
             doDecom(hostname)
+
         elif task == "restock":
-            pass
+            doRestock(hostname)
+
+        elif task == "repair_isc":
+            doRepair(hostname,"isc")
+
+        elif task == "repair_mdc":
+            doRepair(hostname,"mdc")
+
     except Exception as e:
-        print(hostname+": "+ "Something went wrong!")
-        traceback.print_tb(e.__traceback__)
+            print(hostname+": "+ "Something went wrong!")
+            traceback.print_tb(e.__traceback__)
