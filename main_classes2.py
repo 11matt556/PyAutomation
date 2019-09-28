@@ -153,7 +153,7 @@ class Details:
 
     def set_actual_start(self):
         self.get_actual_start_button().click()
-        time.sleep(5)
+        time.sleep(1)
         self.accept_actual_start()
 
 
