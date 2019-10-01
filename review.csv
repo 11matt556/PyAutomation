@@ -1,25 +1,18 @@
-fake,"Traceback (most recent call last):
-  File ""C:/Users/mrh19a/Documents/Scripts/PyAutomation/main_classes2.py"", line 447, in <module>
-    task = str(item[1]).lower()
-IndexError: list index out of range
+LT5CG71940DS,"Traceback (most recent call last):
+  File ""C:/Users/mrh19a/Documents/Scripts/PyAutomation/main_classes2.py"", line 459, in <module>
+    tims_table.get_body_cell(item_row,  tims_table.find_col_with_name(""number"")).click()
+  File ""C:/Users/mrh19a/Documents/Scripts/PyAutomation/main_classes2.py"", line 327, in get_body_cell
+    cell = self.get_body_row(r)[c]
+  File ""C:/Users/mrh19a/Documents/Scripts/PyAutomation/main_classes2.py"", line 323, in get_body_row
+    row_items = self.rows_body[r].find_elements_by_tag_name(""td"")
+TypeError: list indices must be integers or slices, not NoneType
 "
-fake,"Traceback (most recent call last):
-  File ""C:/Users/mrh19a/Documents/Scripts/PyAutomation/main_classes2.py"", line 447, in <module>
-    task = str(item[1]).lower()
-IndexError: list index out of range
-"
-fake,"Traceback (most recent call last):
-  File ""C:/Users/mrh19a/Documents/Scripts/PyAutomation/main_classes2.py"", line 447, in <module>
-    task = str(item[1]).lower()
-IndexError: list index out of range
-"
-fake,"Traceback (most recent call last):
-  File ""C:/Users/mrh19a/Documents/Scripts/PyAutomation/main_classes2.py"", line 447, in <module>
-    task = str(item[1]).lower()
-IndexError: list index out of range
-"
-fake,"Traceback (most recent call last):
-  File ""C:/Users/mrh19a/Documents/Scripts/PyAutomation/main_classes2.py"", line 447, in <module>
-    task = str(item[1]).lower()
-IndexError: list index out of range
+LT5CG7241BT7,"Traceback (most recent call last):
+  File ""C:/Users/mrh19a/Documents/Scripts/PyAutomation/main_classes2.py"", line 459, in <module>
+    tims_table.get_body_cell(item_row,  tims_table.find_col_with_name(""number"")).click()
+  File ""C:/Users/mrh19a/Documents/Scripts/PyAutomation/main_classes2.py"", line 327, in get_body_cell
+    cell = self.get_body_row(r)[c]
+  File ""C:/Users/mrh19a/Documents/Scripts/PyAutomation/main_classes2.py"", line 323, in get_body_row
+    row_items = self.rows_body[r].find_elements_by_tag_name(""td"")
+TypeError: list indices must be integers or slices, not NoneType
 "

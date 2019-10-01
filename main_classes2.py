@@ -424,6 +424,9 @@ def write_review():
         print("\t"+str(REVIEW_REQUIRED[x]))
         CSV.appendToCSV(REVIEW_REQUIRED[x], 'review.csv')
 
+class ItemNotFound(Exception):
+    pass
+
 computers = CSV.import_csv('input.csv')
 
 # TODO: Check CSV for errors (eg, "decom" instead of "decommission"
@@ -435,7 +438,10 @@ driver.find_element_by_xpath("//*[@id='maincontent']/tbody/tr[4]/td[2]").click()
 CSV.clearCSV('output.csv')
 CSV.appendToCSV(['Tech Name', 'SN', 'PC Name', 'RITM', 'Restock/Repair', 'Label Notes'], 'output.csv')
 
+current = 1
+total_time = 0
 for item in computers:
+    start_time = time.time()
 
     ServiceNow.tims_queue()
 
@@ -445,20 +451,13 @@ for item in computers:
     try:
         hostname = item[0]
         task = str(item[1]).lower()
-
         print("====================" + hostname + " (" + task + ")" + "====================")
+        print(str(current) + " of " + str(len(computers)))
         tims_table = Table("task_table")
         item_row = tims_table.find_in_col(hostname, "Configuration item") # Find which row the hostname is in
         taskCol = tims_table.find_col_with_name("number")  # Get the index of the task "number" column
         tims_table.get_body_cell(item_row,  tims_table.find_col_with_name("number")).click()
 
-    except Exception as e:
-        print("Error locating item: " + hostname + " Skipping to next item")
-        REVIEW_REQUIRED.append([hostname, traceback.format_exc()])
-        write_review()
-        continue
-
-    try:
         if task == "decommission":
             doDecom(hostname)
 
@@ -480,3 +479,20 @@ for item in computers:
             traceback.print_tb(e.__traceback__)
 
         write_review()
+    except ItemNotFound as e:
+        print("Unable to find " + hostname + " in table.")
+        print("\t"+repr(e))
+        REVIEW_REQUIRED.append([hostname, traceback.format_exc()])
+
+        if VERBOSE_LOG:
+            traceback.print_tb(e.__traceback__)
+
+    finally:
+        if REVIEW_REQUIRED:
+            write_review()
+
+        elapsed_time = time.time() - start_time
+        print(str(elapsed_time) + " taken to complete ticket")
+        total_time = elapsed_time + total_time
+        print("Total time taken: " + str(total_time))
+        current = current+1
