@@ -454,6 +454,7 @@ for item in computers:
         print("====================" + hostname + " (" + task + ")" + "====================")
         print(str(current) + " of " + str(len(computers)))
         tims_table = Table("task_table")
+        # TODO: Use ItemNotFound exception to properly warn user when an item can't be found in a table, rather than using the generic Exception
         item_row = tims_table.find_in_col(hostname, "Configuration item") # Find which row the hostname is in
         taskCol = tims_table.find_col_with_name("number")  # Get the index of the task "number" column
         tims_table.get_body_cell(item_row,  tims_table.find_col_with_name("number")).click()
