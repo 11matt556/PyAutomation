@@ -29,7 +29,7 @@ __VALID_STATES = {
 
 REVIEW_REQUIRED = []
 VERBOSE_LOG = True
-SAVE_TICKET = True
+SAVE_TICKET = False
 
 driver = webdriver.Chrome()
 driver.implicitly_wait(1)
@@ -496,4 +496,7 @@ for item in computers:
         print(str(elapsed_time) + " taken to complete ticket")
         total_time = elapsed_time + total_time
         print("Total time taken: " + str(total_time))
+        avg_time = total_time/current
+        eta_time = avg_time * (len(computers) - current)
+        print("ETA: " + str(eta_time))
         current = current+1
