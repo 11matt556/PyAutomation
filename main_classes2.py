@@ -29,7 +29,7 @@ __VALID_STATES = {
 
 REVIEW_REQUIRED = []
 VERBOSE_LOG = True
-SAVE_TICKET = False
+SAVE_TICKET = True
 
 driver = webdriver.Chrome()
 driver.implicitly_wait(1)
@@ -359,7 +359,7 @@ def doDecom(configuration_item):
     dm_restock.details_tab.set_actual_start()
     dm_restock.submit()
 
-    CSV.appendToCSV(['', '', configuration_item, ritm, "Decommission"], 'output.csv')
+    CSV.appendToCSV(['', '', configuration_item, ritm, "decommission"], 'output.csv')
 
 
 def doRestock(configuration_item):
