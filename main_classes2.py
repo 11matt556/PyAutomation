@@ -239,6 +239,10 @@ class RestockVar:  # Variable tab for dm_restock tickets
 
 class ServiceNow:
     @staticmethod
+    def my_queue():
+        driver.get("https://prismahealth.service-now.com/nav_to.do?uri=%2Ftask_list.do%3Fsysparm_query%3Dactive%3Dtrue%5Eassigned_to%3Djavascript:getMyAssignments()%5Estate!%3D-5%5EORsys_class_name%3Dchange_request%5EEQ%26sysparm_userpref_module%3D1523b8d4c611227b00be8216ec331b9a%26sysparm_clear_stack%3Dtrue")
+
+    @staticmethod
     def tims_queue():
         driver.get(
             "https://prismahealth.service-now.com/nav_to.do?uri=%2Ftask_list.do%3Fsysparm_fixed_query%3D%26sysparm_query%3Dactive%253Dtrue%255Eassigned_to%253D78ae421e1b4fb700f15a4005bd4bcb8d%26sysparm_clear_stack%3Dtrue")
@@ -278,6 +282,28 @@ class ServiceNow:
             ServiceNow.acceptAlert()
         switchToDefaultFrame()
         switchToContentFrame()
+
+    @staticmethod
+    def search_all_tasks(input_string):
+        # TODO: "Search" filters in table require modifications to the Table clas
+        # This is because it uses td elements in thead instead of th elements
+        driver.get("https://prismahealth.service-now.com/nav_to.do?uri=%2Ftask_list.do%3Fsysparm_fixed_query%3D%26sysparm_query%3D%26sysparm_clear_stack%3Dtrue")
+        switchToDefaultFrame()
+        switchToContentFrame()
+        search_box = driver.find_element_by_xpath("//input")
+        search_box.send_keys(input_string)
+        search_box.send_keys(Keys.RETURN)
+
+        table = Table("task_table")
+        config_col = table.find_col_with_name("configuration item")
+        print(str(table.get_header_row_len()))
+        search_config = table.get_header_cell(0, 2)
+        print(search_config)
+        #search_config.send_keys(input_string)
+
+
+
+
 
 
 class Table:
@@ -336,8 +362,7 @@ class Table:
                 return i
 
     # Returns row index of cell, not the cell itself!
-    def find_in_col(self, cellName,
-                    colName) -> int:  # Search in coName for a cell named cellName and return the row index
+    def find_row_in_col(self, cellName, colName) -> int:  # Search in coName for a cell named cellName and return the row index
         print("----Looking for " + cellName + " in " + colName + "----")
         for row_index in range(self.get_body_row_len()):
             col = self.find_col_with_name(colName)
@@ -347,6 +372,21 @@ class Table:
             if str(cell.text).lower() == cellName.lower():
                 print("FOUND " + str(cellName) + " in row_index " + str(row_index))
                 return row_index
+
+    # Returns a list of row indices contaning the cellName in colName
+    def find_rows_in_col(self, cellName, colName) -> list:
+        found_rows = []
+        print("----Looking for " + cellName + " in " + colName + "----")
+        for row_index in range(self.get_body_row_len()):
+            col = self.find_col_with_name(colName)
+            cell = self.get_body_cell(row_index, col)
+            print(str(row_index) + "," + str(col) + " " + cell.text + "\r", end=" ", flush=True)
+
+            if str(cell.text).lower() == cellName.lower():
+                print("FOUND " + str(cellName) + " in row_index " + str(row_index))
+                found_rows.append(row_index)
+
+        return  found_rows
 
 
 def doDecom(configuration_item):
@@ -398,7 +438,7 @@ def doRepair(configuration_item, repair_type):  # repair_type can be "isc", or "
         task_col = table.find_col_with_name("Number")
         desc_col = table.find_col_with_name("Short description")
 
-        cell_row = table.find_in_col("open", "state")  # Find open ticket
+        cell_row = table.find_row_in_col("open", "state")  # Find open ticket
         # TODO: Perform additional validation that this is the correct ticket
         table.get_body_cell(cell_row, task_col).click()  # Click on the open ticket
 
@@ -443,6 +483,10 @@ total_time = 0
 for item in computers:
     start_time = time.time()
 
+    #ServiceNow.search_all_tasks("LT5CG9350DDV")
+
+    time.sleep(15)
+    # TODO: Put ticket search and selection logic into a function. Check both my queue and tim's queue
     ServiceNow.tims_queue()
 
     if not SAVE_TICKET:
@@ -453,11 +497,13 @@ for item in computers:
         task = str(item[1]).lower()
         print("====================" + hostname + " (" + task + ")" + "====================")
         print(str(current) + " of " + str(len(computers)))
-        tims_table = Table("task_table")
+        catalog_table = Table("task_table")
         # TODO: Use ItemNotFound exception to properly warn user when an item can't be found in a table, rather than using the generic Exception
-        item_row = tims_table.find_in_col(hostname, "Configuration item") # Find which row the hostname is in
-        taskCol = tims_table.find_col_with_name("number")  # Get the index of the task "number" column
-        tims_table.get_body_cell(item_row,  tims_table.find_col_with_name("number")).click()
+
+        item_row = catalog_table.find_row_in_col(hostname, "Configuration item") # Find which row the hostname is in
+        taskCol = catalog_table.find_col_with_name("number")  # Get the index of the task "number" column
+        catalog_table.get_body_cell(item_row, catalog_table.find_col_with_name("number")).click()
+
 
         if task == "decommission":
             doDecom(hostname)
