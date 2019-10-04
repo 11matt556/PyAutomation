@@ -2,8 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7b1979c9-b11c-4f3a-bcba-4314332d4772" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/input.csv" beforeDir="false" afterPath="$PROJECT_DIR$/input.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main_classes2.py" beforeDir="false" afterPath="$PROJECT_DIR$/main_classes2.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/output.csv" beforeDir="false" afterPath="$PROJECT_DIR$/output.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/review.csv" beforeDir="false" afterPath="$PROJECT_DIR$/review.csv" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -31,8 +34,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main_classes2.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="293">
-              <caret line="297" column="50" selection-start-line="297" selection-start-column="50" selection-end-line="297" selection-end-column="50" />
+            <state relative-caret-position="-659">
+              <caret line="487" column="5" selection-start-line="487" selection-start-column="5" selection-end-line="487" selection-end-column="5" />
               <folding>
                 <element signature="e#0#30#0" expanded="true" />
               </folding>
@@ -114,10 +117,10 @@
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="955" />
-    <option name="y" value="5" />
-    <option name="width" value="960" />
-    <option name="height" value="1042" />
+    <option name="x" value="1147" />
+    <option name="y" value="3" />
+    <option name="width" value="768" />
+    <option name="height" value="1034" />
   </component>
   <component name="ProjectId" id="1PRdJk4hLIXob3A41oZDzwbAQyC" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
@@ -293,21 +296,20 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="955" y="5" width="960" height="1042" extended-state="0" />
-    <editor active="true" />
+    <frame x="777" y="100" width="446" height="928" extended-state="0" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.47311828" visible="true" weight="0.23210412" />
-      <window_info id="Structure" order="1" sideWeight="0.5268817" side_tool="true" visible="true" weight="0.23210412" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.47202796" visible="true" weight="0.5245098" />
+      <window_info id="Structure" order="1" sideWeight="0.52797204" side_tool="true" visible="true" weight="0.5245098" />
       <window_info id="Favorites" order="2" sideWeight="0.50150603" side_tool="true" weight="0.10063224" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32563257" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.28382838" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.28382838" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32741934" />
       <window_info anchor="bottom" id="Version Control" order="7" weight="0.27942795" />
-      <window_info anchor="bottom" id="Terminal" order="8" weight="0.24532454" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="8" visible="true" weight="0.28050315" />
       <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" weight="0.32936078" />
       <window_info anchor="bottom" id="Python Console" order="10" weight="0.3278328" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
@@ -387,8 +389,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/main_classes2.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="293">
-          <caret line="297" column="50" selection-start-line="297" selection-start-column="50" selection-end-line="297" selection-end-column="50" />
+        <state relative-caret-position="-659">
+          <caret line="487" column="5" selection-start-line="487" selection-start-column="5" selection-end-line="487" selection-end-column="5" />
           <folding>
             <element signature="e#0#30#0" expanded="true" />
           </folding>

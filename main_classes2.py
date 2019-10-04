@@ -485,9 +485,9 @@ for item in computers:
 
     #ServiceNow.search_all_tasks("LT5CG9350DDV")
 
-    time.sleep(15)
+    #time.sleep(15)
     # TODO: Put ticket search and selection logic into a function. Check both my queue and tim's queue
-    ServiceNow.tims_queue()
+    ServiceNow.my_queue()
 
     if not SAVE_TICKET:
         ServiceNow.acceptAlert()

@@ -1,18 +1,18 @@
-LT5CG71940DS,"Traceback (most recent call last):
-  File ""C:/Users/mrh19a/Documents/Scripts/PyAutomation/main_classes2.py"", line 459, in <module>
-    tims_table.get_body_cell(item_row,  tims_table.find_col_with_name(""number"")).click()
-  File ""C:/Users/mrh19a/Documents/Scripts/PyAutomation/main_classes2.py"", line 327, in get_body_cell
+LT5CG5201FMY,"Traceback (most recent call last):
+  File ""main_classes2.py"", line 505, in <module>
+    catalog_table.get_body_cell(item_row, catalog_table.find_col_with_name(""number"")).click()
+  File ""main_classes2.py"", line 353, in get_body_cell
     cell = self.get_body_row(r)[c]
-  File ""C:/Users/mrh19a/Documents/Scripts/PyAutomation/main_classes2.py"", line 323, in get_body_row
+  File ""main_classes2.py"", line 349, in get_body_row
     row_items = self.rows_body[r].find_elements_by_tag_name(""td"")
 TypeError: list indices must be integers or slices, not NoneType
 "
-LT5CG7241BT7,"Traceback (most recent call last):
-  File ""C:/Users/mrh19a/Documents/Scripts/PyAutomation/main_classes2.py"", line 459, in <module>
-    tims_table.get_body_cell(item_row,  tims_table.find_col_with_name(""number"")).click()
-  File ""C:/Users/mrh19a/Documents/Scripts/PyAutomation/main_classes2.py"", line 327, in get_body_cell
+LT5CG5192XDCM,"Traceback (most recent call last):
+  File ""main_classes2.py"", line 505, in <module>
+    catalog_table.get_body_cell(item_row, catalog_table.find_col_with_name(""number"")).click()
+  File ""main_classes2.py"", line 353, in get_body_cell
     cell = self.get_body_row(r)[c]
-  File ""C:/Users/mrh19a/Documents/Scripts/PyAutomation/main_classes2.py"", line 323, in get_body_row
+  File ""main_classes2.py"", line 349, in get_body_row
     row_items = self.rows_body[r].find_elements_by_tag_name(""td"")
 TypeError: list indices must be integers or slices, not NoneType
 "
