@@ -32,7 +32,7 @@ VERBOSE_LOG = True
 SAVE_TICKET = True
 
 driver = webdriver.Chrome()
-driver.implicitly_wait(1)
+driver.implicitly_wait(5)
 
 
 def switchToContentFrame():
@@ -485,7 +485,7 @@ for item in computers:
 
     #ServiceNow.search_all_tasks("LT5CG9350DDV")
 
-    #time.sleep(15)
+    time.sleep(5)
     # TODO: Put ticket search and selection logic into a function. Check both my queue and tim's queue
     ServiceNow.my_queue()
 
@@ -501,10 +501,11 @@ for item in computers:
         # TODO: Use ItemNotFound exception to properly warn user when an item can't be found in a table, rather than using the generic Exception
 
         item_row = catalog_table.find_row_in_col(hostname, "Configuration item") # Find which row the hostname is in
+        print("item row" + str(item_row))
         taskCol = catalog_table.find_col_with_name("number")  # Get the index of the task "number" column
+        print("taskcol" + str(taskCol))
         catalog_table.get_body_cell(item_row, catalog_table.find_col_with_name("number")).click()
-
-
+        #time.sleep(1)
         if task == "decommission":
             doDecom(hostname)
 
