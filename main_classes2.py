@@ -17,7 +17,7 @@ __CANNED_RESPONSES = {
     "acknowledge": "Acknowledging asset/ticket",
     "restock": "Device to be restocked, W10 Rollout; Device has been tested and wiped",
     "reclaim": "Device has been reclaimed; Device to be restocked after testing & cleaning.",
-    "decommission": "This device is being decommissioned; send to MDC",
+    "decommission": "This device is being decommissioned; send to LDC",
     "repair_mdc": "Device to be sent in for repair/stock at MDC",
     "repair_isc_ssd": "USDT device to be repaired with SSD swapout"
 }
@@ -122,6 +122,8 @@ class CatalogTask:
 
         if SAVE_TICKET:
             saveButton.click()
+            print("Submitting Ticket...")
+            time.sleep(5)
             print("Ticket Submitted")
         else:
             print(
@@ -367,8 +369,8 @@ class Table:
         for row_index in range(self.get_body_row_len()):
             col = self.find_col_with_name(colName)
             cell = self.get_body_cell(row_index, col)
-            print(str(row_index) + "," + str(col) + " " + cell.text + "\r", end=" ", flush=True)
-
+            #print(str(row_index) + "," + str(col) + " " + cell.text + "\r", end=" ", flush=True)
+            print(str(row_index) + "," + str(col) + " " + cell.text)
             if str(cell.text).lower() == cellName.lower():
                 print("FOUND " + str(cellName) + " in row_index " + str(row_index))
                 return row_index
@@ -487,7 +489,12 @@ for item in computers:
 
     time.sleep(5)
     # TODO: Put ticket search and selection logic into a function. Check both my queue and tim's queue
+    # Handle "phantom alert" case where alert pops up due to ticket being saved too quickly,
+    # or when attempting to search for an RITM after saving it
+    # Handle seemingly random case where item will not be located in table even though it is present
+    # Note: Above case should be fixed when search is redesigned
     ServiceNow.my_queue()
+    time.sleep(5)
 
     if not SAVE_TICKET:
         ServiceNow.acceptAlert()
@@ -501,9 +508,7 @@ for item in computers:
         # TODO: Use ItemNotFound exception to properly warn user when an item can't be found in a table, rather than using the generic Exception
 
         item_row = catalog_table.find_row_in_col(hostname, "Configuration item") # Find which row the hostname is in
-        print("item row" + str(item_row))
         taskCol = catalog_table.find_col_with_name("number")  # Get the index of the task "number" column
-        print("taskcol" + str(taskCol))
         catalog_table.get_body_cell(item_row, catalog_table.find_col_with_name("number")).click()
         #time.sleep(1)
         if task == "decommission":
