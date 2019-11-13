@@ -29,7 +29,7 @@ __VALID_STATES = {
 
 REVIEW_REQUIRED = []
 VERBOSE_LOG = True
-SAVE_TICKET = True
+SAVE_TICKET = False
 
 driver = webdriver.Chrome()
 driver.implicitly_wait(5)
@@ -155,7 +155,7 @@ class Details:
 
     def set_actual_start(self):
         self.get_actual_start_button().click()
-        time.sleep(1)
+        time.sleep(2)
         self.accept_actual_start()
 
 
@@ -282,7 +282,7 @@ class ServiceNow:
         searchbox.send_keys(Keys.RETURN)
         if not SAVE_TICKET:
             ServiceNow.acceptAlert()
-        switchToDefaultFrame()
+        #switchToDefaultFrame()
         switchToContentFrame()
 
     @staticmethod
@@ -366,6 +366,7 @@ class Table:
     # Returns row index of cell, not the cell itself!
     def find_row_in_col(self, cellName, colName) -> int:  # Search in coName for a cell named cellName and return the row index
         print("----Looking for " + cellName + " in " + colName + "----")
+
         for row_index in range(self.get_body_row_len()):
             col = self.find_col_with_name(colName)
             cell = self.get_body_cell(row_index, col)
@@ -374,6 +375,13 @@ class Table:
             if str(cell.text).lower() == cellName.lower():
                 print("FOUND " + str(cellName) + " in row_index " + str(row_index))
                 return row_index
+        #raise ItemNotFound
+
+    def find_task_for(self, host_name):
+        item_row = self.find_row_in_col(host_name, "Configuration item")  # Find which row the hostname is in
+        task_col = self.find_col_with_name("number")  # Find which column contains the sctask number
+        return self.get_body_cell(item_row, task_col)  # Return the task element
+
 
     # Returns a list of row indices contaning the cellName in colName
     def find_rows_in_col(self, cellName, colName) -> list:
@@ -432,8 +440,12 @@ def doRepair(configuration_item, repair_type):  # repair_type can be "isc", or "
         dm_restock.submit()  # Submit the ticket
 
         # Now we need to locate the dm_repair task to complete the repair.
-
-        ServiceNow.search(ritm)  # Go to the RITM page.
+        try:
+            ServiceNow.search(ritm)  # Go to the RITM page.
+        except seleniumExceptions.UnexpectedAlertPresentException:
+            print("UNEXPECTED ALERT PRESENT! WAITING 15 SECONDS AND TRYING AGAIN")
+            time.sleep(15)
+            ServiceNow.search(ritm)
 
         table = Table("sc_req_item.sc_task.request_item_table")  # Load table of catalog tasks associated with this RITM
         state_col = table.find_col_with_name("State")
@@ -465,6 +477,7 @@ def write_review():
     for x in range(len(REVIEW_REQUIRED)):
         print("\t"+str(REVIEW_REQUIRED[x]))
         CSV.appendToCSV(REVIEW_REQUIRED[x], 'review.csv')
+
 
 class ItemNotFound(Exception):
     pass
@@ -499,18 +512,43 @@ for item in computers:
     if not SAVE_TICKET:
         ServiceNow.acceptAlert()
 
+    hostname = item[0]
+    task = str(item[1]).lower()
+
     try:
-        hostname = item[0]
-        task = str(item[1]).lower()
         print("====================" + hostname + " (" + task + ")" + "====================")
         print(str(current) + " of " + str(len(computers)))
-        catalog_table = Table("task_table")
-        # TODO: Use ItemNotFound exception to properly warn user when an item can't be found in a table, rather than using the generic Exception
 
-        item_row = catalog_table.find_row_in_col(hostname, "Configuration item") # Find which row the hostname is in
-        taskCol = catalog_table.find_col_with_name("number")  # Get the index of the task "number" column
-        catalog_table.get_body_cell(item_row, catalog_table.find_col_with_name("number")).click()
+        def check_all_pages_for_task():
+            while True:
+                # We want to do everything at least once
+
+                catalog_table = Table("task_table")
+                total_rows = driver.find_element_by_css_selector("[id*=total_rows]").text
+                last_row = driver.find_element_by_css_selector("[id*=last_row]").text
+
+                print("Total:" + str(total_rows))
+                print("Last:" + str(last_row))
+
+                try:
+                    sc_task = catalog_table.find_task_for(hostname)
+                except Exception:
+                    pass
+
+                if total_rows == last_row:
+                    #If true then we are already on the last page and can exit the while loop
+                    break
+                else:
+                    print("Checking next page for ticket")
+                    driver.find_element_by_name("vcr_next").click()
+                    time.sleep(3)
+
+            return sc_task
+
+        check_all_pages_for_task().click()
+
         #time.sleep(1)
+
         if task == "decommission":
             doDecom(hostname)
 
@@ -532,13 +570,7 @@ for item in computers:
             traceback.print_tb(e.__traceback__)
 
         write_review()
-    except ItemNotFound as e:
-        print("Unable to find " + hostname + " in table.")
-        print("\t"+repr(e))
-        REVIEW_REQUIRED.append([hostname, traceback.format_exc()])
 
-        if VERBOSE_LOG:
-            traceback.print_tb(e.__traceback__)
 
     finally:
         if REVIEW_REQUIRED:
