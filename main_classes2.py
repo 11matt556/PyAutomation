@@ -530,14 +530,22 @@ for item in computers:
                 print("Total:" + str(total_rows))
                 print("Last:" + str(last_row))
 
+                sc_task = None
+
                 try:
                     sc_task = catalog_table.find_task_for(hostname)
                 except Exception:
                     pass
-
-                if total_rows == last_row:
-                    #If true then we are already on the last page and can exit the while loop
+                
+                # If we have found the task, return early
+                if sc_task:
+                    
+                    return sc_task
+                # Exit While loop since we are at end of table
+                elif total_rows == last_row:
+                    print("End of table")
                     break
+                # Otherwise, check the next page
                 else:
                     print("Checking next page for ticket")
                     driver.find_element_by_name("vcr_next").click()
