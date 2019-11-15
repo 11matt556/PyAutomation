@@ -29,7 +29,7 @@ __VALID_STATES = {
 
 REVIEW_REQUIRED = []
 VERBOSE_LOG = True
-SAVE_TICKET = False
+SAVE_TICKET = True
 
 driver = webdriver.Chrome()
 driver.implicitly_wait(5)
@@ -416,10 +416,10 @@ def doRestock(configuration_item):
     print("RESTOCKING " + configuration_item)
     dm_restock = DmRestock()
     ritm = dm_restock.get_ritm()
-    dm_restock.set_state(__VALID_STATES['cc'])
+    dm_restock.details_tab.set_actual_start()
     dm_restock.notes_tab.setAdditionalComments(__CANNED_RESPONSES['restock'])
     dm_restock.variables_tab.select_restock_decom_repair("restock")
-    dm_restock.details_tab.set_actual_start()
+    dm_restock.set_state(__VALID_STATES['cc'])
     dm_restock.submit()
 
     CSV.appendToCSV(['', '', configuration_item, ritm, "restock"], 'output.csv')
@@ -458,10 +458,10 @@ def doRepair(configuration_item, repair_type):  # repair_type can be "isc", or "
 
         # Now we are on the dm_repair ticket page
         dm_repair = DmRepair()
-        dm_repair.set_state(__VALID_STATES['cc'])
         dm_repair.details_tab.set_actual_start()
-        dm_repair.notes_tab.setAdditionalComments(__CANNED_RESPONSES['repair_isc_ssd'])
         dm_repair.variables_tab.select_repair_type('restock')
+        dm_repair.notes_tab.setAdditionalComments(__CANNED_RESPONSES['repair_isc_ssd'])
+        dm_repair.set_state(__VALID_STATES['cc'])
         dm_repair.submit()
 
     elif repair_type == "mdc":
@@ -536,10 +536,10 @@ for item in computers:
                     sc_task = catalog_table.find_task_for(hostname)
                 except Exception:
                     pass
-                
+
                 # If we have found the task, return early
                 if sc_task:
-                    
+
                     return sc_task
                 # Exit While loop since we are at end of table
                 elif total_rows == last_row:
