@@ -29,7 +29,7 @@ __VALID_STATES = {
 
 REVIEW_REQUIRED = []
 VERBOSE_LOG = True
-SAVE_TICKET = True
+SAVE_TICKET = False
 
 driver = webdriver.Chrome()
 driver.implicitly_wait(5)
@@ -149,15 +149,18 @@ class Details:
     def get_actual_start_button(self):
         return self.actual_start_button
 
-    @staticmethod
-    def accept_actual_start():
-        driver.find_element_by_xpath("//button[@id='GwtDateTimePicker_ok']").click()
+    #@staticmethod
+    #def accept_actual_start():
+     #   driver.find_element_by_xpath("//button[@id='GwtDateTimePicker_ok']").click()
 
     def set_actual_start(self):
-        self.get_actual_start_button().click()
-        time.sleep(2)
-        self.accept_actual_start()
-
+        print("Setting actual start + 5 minutes")
+        actual_start = driver.find_element_by_xpath("//input[@id='sc_task.work_start']")
+        actual_start.clear()
+        actual_start.click()
+        current_time = datetime.datetime.now()
+        actual_start.send_keys(str((current_time + datetime.timedelta(minutes=5)).strftime("%m-%d-%Y %H:%M:%S")))
+        actual_start.send_keys(Keys.ENTER)
 
 class Notes:
 
