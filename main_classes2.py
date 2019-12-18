@@ -29,7 +29,7 @@ __VALID_STATES = {
 
 REVIEW_REQUIRED = []
 VERBOSE_LOG = True
-SAVE_TICKET = False
+SAVE_TICKET = True
 
 driver = webdriver.Chrome()
 driver.implicitly_wait(5)
@@ -123,7 +123,7 @@ class CatalogTask:
         if SAVE_TICKET:
             saveButton.click()
             print("Submitting Ticket...")
-            time.sleep(5)
+            #time.sleep(5)
             print("Ticket Submitted")
         else:
             print(
@@ -155,9 +155,10 @@ class Details:
 
     def set_actual_start(self):
         print("Setting actual start + 5 minutes")
+        time.sleep(2)
         actual_start = driver.find_element_by_xpath("//input[@id='sc_task.work_start']")
         actual_start.clear()
-        actual_start.click()
+        #actual_start.click()
         current_time = datetime.datetime.now()
         actual_start.send_keys(str((current_time + datetime.timedelta(minutes=5)).strftime("%m-%d-%Y %H:%M:%S")))
         actual_start.send_keys(Keys.ENTER)
@@ -262,31 +263,39 @@ class ServiceNow:
         driver.get("https://prismahealth.service-now.com")
 
     @staticmethod
-    def acceptAlert():
+    def waitForAlert():
         try:
-            WebDriverWait(driver, 1).until(EC.alert_is_present(), 'Timed out waiting for confirmation popup to appear.')
+            WebDriverWait(driver, 1).until(EC.alert_is_present(),
+                                           'Timed out waiting for confirmation popup to appear.')
             alertObj = driver.switch_to.alert
             alertObj.accept()
             print("Accepted Alert")
+            REVIEW_REQUIRED.append([hostname, "Alerted accepted. Verify ticket completion."])
         except seleniumExceptions.TimeoutException as e:
-            # print("No alert to accept")
+            print("No alert to accept")
             pass
 
     @staticmethod
     def search(inputString):
         switchToDefaultFrame()
         print("Searching for " + inputString)
-        searchbutton = driver.find_element_by_xpath("//label/span")
-        searchbutton.click()
-        searchbox = driver.find_element_by_xpath("//form/div/input")
-        searchbox.clear()
-        searchbox.click()
-        searchbox.send_keys(inputString)
-        searchbox.send_keys(Keys.RETURN)
-        if not SAVE_TICKET:
-            ServiceNow.acceptAlert()
-        #switchToDefaultFrame()
-        switchToContentFrame()
+        try:
+            searchbutton = driver.find_element_by_xpath("//label/span")
+            searchbutton.click()
+            searchbox = driver.find_element_by_xpath("//form/div/input")
+            searchbox.clear()
+            searchbox.click()
+            searchbox.send_keys(inputString)
+            searchbox.send_keys(Keys.RETURN)
+            if not SAVE_TICKET:
+                ServiceNow.acceptAlert()
+            #switchToDefaultFrame()
+            switchToContentFrame()
+        except seleniumExceptions.UnexpectedAlertPresentException:
+            print("UNEXPECTED ALERT PRESENT! WAITING 15 SECONDS AND TRYING AGAIN")
+            time.sleep(15)
+            ServiceNow.search(inputString)
+
 
     @staticmethod
     def search_all_tasks(input_string):
@@ -443,12 +452,7 @@ def doRepair(configuration_item, repair_type):  # repair_type can be "isc", or "
         dm_restock.submit()  # Submit the ticket
 
         # Now we need to locate the dm_repair task to complete the repair.
-        try:
-            ServiceNow.search(ritm)  # Go to the RITM page.
-        except seleniumExceptions.UnexpectedAlertPresentException:
-            print("UNEXPECTED ALERT PRESENT! WAITING 15 SECONDS AND TRYING AGAIN")
-            time.sleep(15)
-            ServiceNow.search(ritm)
+        ServiceNow.search(ritm)  # Go to the RITM page.
 
         table = Table("sc_req_item.sc_task.request_item_table")  # Load table of catalog tasks associated with this RITM
         state_col = table.find_col_with_name("State")
@@ -503,17 +507,17 @@ for item in computers:
 
     #ServiceNow.search_all_tasks("LT5CG9350DDV")
 
-    time.sleep(5)
+    #time.sleep(5)
     # TODO: Put ticket search and selection logic into a function. Check both my queue and tim's queue
     # Handle "phantom alert" case where alert pops up due to ticket being saved too quickly,
     # or when attempting to search for an RITM after saving it
     # Handle seemingly random case where item will not be located in table even though it is present
     # Note: Above case should be fixed when search is redesigned
     ServiceNow.my_queue()
-    time.sleep(5)
+    #time.sleep(5)
 
     if not SAVE_TICKET:
-        ServiceNow.acceptAlert()
+        ServiceNow.waitForAlert()
 
     hostname = item[0]
     task = str(item[1]).lower()
@@ -542,7 +546,6 @@ for item in computers:
 
                 # If we have found the task, return early
                 if sc_task:
-
                     return sc_task
                 # Exit While loop since we are at end of table
                 elif total_rows == last_row:
@@ -557,8 +560,6 @@ for item in computers:
             return sc_task
 
         check_all_pages_for_task().click()
-
-        #time.sleep(1)
 
         if task == "decommission":
             doDecom(hostname)
