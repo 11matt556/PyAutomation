@@ -110,24 +110,29 @@ class CatalogTask:
 
     @staticmethod
     def submit():
-        actions = webdriver.ActionChains(driver)
+        try:
+            actions = webdriver.ActionChains(driver)
 
-        saveMenu = driver.find_element_by_xpath("//nav/div")
-        actions.move_to_element(saveMenu)
-        actions.context_click(saveMenu)
-        actions.perform()
-        actions.reset_actions()
+            saveMenu = driver.find_element_by_xpath("//nav/div")
+            actions.move_to_element(saveMenu)
+            actions.context_click(saveMenu)
+            actions.perform()
+            actions.reset_actions()
 
-        saveButton = driver.find_element_by_xpath("//div[@id='context_1']/div[2]")
+            saveButton = driver.find_element_by_xpath("//div[@id='context_1']/div[2]")
 
-        if SAVE_TICKET:
-            saveButton.click()
-            print("Submitting Ticket...")
-            #time.sleep(5)
-            print("Ticket Submitted")
-        else:
-            print(
-                "Ticket not saved! Make sure to set the saveTicket variable to True if you want to actually submit changes to the ticket.")
+            if SAVE_TICKET:
+                saveButton.click()
+                print("Submitting Ticket...")
+                time.sleep(1)
+                print("Ticket Submitted")
+            else:
+                print(
+                    "Ticket not saved! Make sure to set the saveTicket variable to True if you want to actually submit changes to the ticket.")
+        except seleniumExceptions.UnexpectedAlertPresentException:
+            print("UNEXPECTED ALERT PRESENT! WAITING 5 SECONDS AND TRYING AGAIN")
+            time.sleep(5)
+            CatalogTask.submit()
 
 
 class Details:
@@ -502,19 +507,19 @@ CSV.appendToCSV(['Tech Name', 'SN', 'PC Name', 'RITM', 'Restock/Repair', 'Label 
 
 current = 1
 total_time = 0
+
 for item in computers:
     start_time = time.time()
 
     #ServiceNow.search_all_tasks("LT5CG9350DDV")
 
-    #time.sleep(5)
+    time.sleep(5)
     # TODO: Put ticket search and selection logic into a function. Check both my queue and tim's queue
     # Handle "phantom alert" case where alert pops up due to ticket being saved too quickly,
     # or when attempting to search for an RITM after saving it
     # Handle seemingly random case where item will not be located in table even though it is present
     # Note: Above case should be fixed when search is redesigned
     ServiceNow.my_queue()
-    #time.sleep(5)
 
     if not SAVE_TICKET:
         ServiceNow.waitForAlert()
@@ -576,7 +581,7 @@ for item in computers:
     except Exception as e:
         print("Error in item: " + hostname)
         print("\t"+repr(e))
-        REVIEW_REQUIRED.append([hostname, traceback.format_exc()])
+        REVIEW_REQUIRED.append([hostname, task , traceback.format_exc()])
 
         if VERBOSE_LOG:
             traceback.print_tb(e.__traceback__)
