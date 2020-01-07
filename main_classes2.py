@@ -291,14 +291,15 @@ class ServiceNow:
             searchbox.clear()
             searchbox.click()
             searchbox.send_keys(inputString)
+            time.sleep(1)
             searchbox.send_keys(Keys.RETURN)
             if not SAVE_TICKET:
                 ServiceNow.acceptAlert()
             #switchToDefaultFrame()
             switchToContentFrame()
         except seleniumExceptions.UnexpectedAlertPresentException:
-            print("UNEXPECTED ALERT PRESENT! WAITING 15 SECONDS AND TRYING AGAIN")
-            time.sleep(15)
+            print("UNEXPECTED ALERT PRESENT! WAITING 5 SECONDS AND TRYING AGAIN")
+            time.sleep(5)
             ServiceNow.search(inputString)
 
 
@@ -501,7 +502,7 @@ computers = CSV.import_csv('input.csv')
 ServiceNow.homepage()
 
 # Login
-driver.find_element_by_xpath("//*[@id='maincontent']/tbody/tr[4]/td[2]").click()
+driver.find_element_by_xpath("//*[@id='maincontent']/tbody/tr[4]/td[3]").click()
 CSV.clearCSV('output.csv')
 CSV.appendToCSV(['Tech Name', 'SN', 'PC Name', 'RITM', 'Restock/Repair', 'Label Notes'], 'output.csv')
 
