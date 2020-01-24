@@ -1,29 +1,33 @@
 # **HOW DO I USE THIS?**
 
 #### INSTALLATION
-1. Download this project
+1. [Download this project](https://gitlab.com/11matt556/PyAutomation/-/archive/master/PyAutomation-master.zip)
 2. Intall [Python 3.x](https://www.python.org/downloads/)
     - **Make sure to check  `Add to PATH` in the installer for easier usage**
-3. Download and place [chromedriver.exe](https://sites.google.com/a/chromium.org/chromedriver/) into the same directory as main.py.
-4. Open up an **admin** command prompt
+3. Download and place [chromedriver.exe](https://sites.google.com/a/chromium.org/chromedriver/) into the same directory as run_me.py.
+4. Open cmd or powershell as an admin
 5. Run `pip install selenium`
 
 #### USAGE
-1. Open `input.csv` and enter the hostnames of the computers you want to work on
-    - The same task will be performed on all entries!
-2. Close and save `input.csv`
-3. Click on `main.py`
-    - If this doesn't work, open up an **admin** command prompt and run `python main.py`
-4. You should now be prompted to enter the type of task you want to do. Enter the task and press enter.
-5. After the program completes it will create an `output.csv` and an `review.csv` file.
-    - "output.csv" will contain the RITM for each computer in the format Tim's script is expecting
-    -  **"output.csv" is cleared each time the program is run**
-6. (Optional) If the program encountered any errors, it will print out the items that caued the errors. It will also save a copy as review.csv.
-    - Please manually review these tickets to make sure they are completed properly
-    - **"review.csv" is cleared each time the program is run**
+1. Open `input.csv`
+2. In column A, enter the hostnames of the computers
+3. In column B, enter the action the script should take on each hostname. Valid actions are "restock", "repair_isc", and "decommission"
+4. Close and save `input.csv`
+5. Click on `run_me.py`
+6. ServiceNow may prompt you to login. If it does, the program will wait for youto login before continuing.
+7. After the program completes all the tikets it will create two files - `output.csv` and `review.csv`
+8. `output.csv` is used to print the labels for the computer. If you have Tim's labeling script then all you need to do is enter your name and press ctrl+alt+p to print the labels.
+9. `review.csv` contains any hostnames the program wasunable to complete tickets for. For example, there may have been no reclaim found for the hostname.
+10. Verify and/or complete any tickets in `review.csv`
 
-Old versions of output.csv and review.csv can be found in the 'logs' folder. They are in the format of `Y-M-D_HM`. 
 
-These logs are not automatically deleted at any point.
+# TROUBLSHOOTING
+#### Unable to start run_me.py
+* Verify python is installed correctly by typing `python --version` in the command line.
+* Try running `run_me.py` from the command line instead of clicking on it
+* Try running `run_me.py` from an admin command prompt
+* Make sure chromedriver.exe is in the directory and that Google Chrome is installed on your computer
 
-Please report any unusual behavior to me as it is very possible there are still some bugs
+#### Blank browser screen after program starts, or program gets stuck on ServiceNow homepage
+* There is a known issue on some computers that cause the program to freeze shortly after opening ServiceNow. 
+* The only known solution is reimaging your computer or trying a different computer
